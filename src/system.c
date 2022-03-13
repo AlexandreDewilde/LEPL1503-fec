@@ -43,12 +43,10 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
     }
 
     // Subsituation  arrière
-    for (uint32_t k = 1; k < system_size; k++)
-    {
+    for (uint32_t k = 1; k < system_size; k++) {
         uint32_t i = system_size - k;
         uint32_t j = i - 1;
-        do
-        {
+        do {
             uint8_t factor = gf256_mul_table[A[j][i]][gf256_inv_table[A[i][i]]];
             uint8_t *b_sub_line = gf_256_mul_vector(b[i], factor, symbol_size);
             b[j] = gf_256_full_add_vector(b[j], b_sub_line, symbol_size);
@@ -57,4 +55,23 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
 
         b[i] = gf_256_inv_vector(b[i], A[i][i], symbol_size);
     }
+}
+
+
+uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
+    tinymt32_t prng;
+    memset(&prng, 0, sizeof(tinymt32_t));
+    prng.mat1 = 0x8f7011ee;
+    prng.mat2 = 0xfc78ff1f;
+    prng.tmat = 0x3793fdff;
+    tinymt32_init(&prng, seed);
+
+    uint8_t **coefs = malloc(nrs);
+    for (uint32_t i = 0; i < nrs; i++) {
+        coefs[i] = malloc(nss);
+        for (uint32_t j = 0; j < nss; j++) {
+            coefs[i][j] = (uint8_t) tinymt32_generate_uint32(&prng);
+        }
+    }
+    return coefs;
 }
