@@ -1,6 +1,9 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include "../headers/gf256_tables.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
 
 typedef struct
