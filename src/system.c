@@ -118,28 +118,3 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
     }
     return coefs;
 }
-
-int main()
-{
-    uint8_t A[3][3] = { {1,2,3}, {5,5,6}, {11,8,9}};
-    uint8_t *A_copy[3] = {A[0], A[1], A[2]};
-    uint8_t b[3][3] = {{0,1,2},{1,1,1},{2,2,2}};
-    uint8_t *b_copy[3] = {b[0], b[1], b[2]};
-
-    gf_256_gaussian_elimination(A_copy, b_copy, 3, 3);
-
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-            printf("%d ", A_copy[i][j]);
-        printf("\n");
-    }
-
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-            printf("%d ", b_copy[i][j]);
-        printf("\n");
-    }
-    
-}
