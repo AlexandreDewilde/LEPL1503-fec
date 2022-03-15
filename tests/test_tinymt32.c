@@ -1,5 +1,4 @@
-#include "../headers/tinymt32.h"
-#include <CUnit/Basic.h>
+#include "./headers/test_tinymt32.h"
 
 void test_tinymt32_gen_42()
 {
@@ -19,14 +18,4 @@ void test_tinymt32_gen_42()
         uint8_t coef = (uint8_t)tinymt32_generate_uint32(&prng);
         CU_ASSERT_EQUAL(coef, expected_res[i]);
     }
-}
-
-int main()
-{
-    CU_initialize_registry();
-    CU_pSuite suite = CU_add_suite("tinymt32", 0, 0);
-    CU_add_test(suite, "correct_coeffs", test_tinymt32_gen_42);
-
-    CU_basic_run_tests();
-    CU_basic_show_failures(CU_get_failure_list());
 }

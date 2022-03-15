@@ -14,11 +14,12 @@ clean:
 	rm -f fec
 	rm -f test_tinymt32
 
-# DOENS'T WORK TODO
-tests: src/tinymt32.c tests/test_system.c
-	$(CC) -o tests_suite src/tinymt32.c tests/test_tinymt32.c -lcunit
+tests: src/tinymt32.c src/system.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
+	$(CC) -o tests_suite $^ -lcunit
 	./tests_suite
-	echo "TODO !"
+	
+clean_tests:
+	rm -f tests_suite
 
 # a .PHONY target forces make to execute the command even if the target already exists
 .PHONY: clean tests

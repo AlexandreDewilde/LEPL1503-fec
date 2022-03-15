@@ -1,4 +1,4 @@
-#include <../headers/tinymt32.h>
+#include "../headers/tinymt32.h"
 
 /**
  * This function certificate the period of 2^127-1.
