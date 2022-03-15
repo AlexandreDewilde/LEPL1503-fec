@@ -9,6 +9,7 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "headers/tinymt32.h"
+#include "headers/system.h"
 
 typedef struct
 {
