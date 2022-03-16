@@ -2,9 +2,10 @@
 
 
 uint8_t** generate_zero_matrix(int x, int y) {
-    uint8_t **matrix = (uint8_t **) malloc(x);
+    uint8_t **matrix = malloc(x*sizeof(uint8_t*));
     for (int i = 0; i < x; i++) {
-        matrix[i] = (uint8_t*) calloc(0, y);
+        matrix[i] = malloc(y);
+        for (int j = 0; j < y; j++) matrix[i][j] = 0;
     }
     return matrix;
 }
