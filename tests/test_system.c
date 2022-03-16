@@ -46,7 +46,7 @@ void test_gf_256_gaussian_elimination_zero() {
     uint8_t **B = generate_zero_matrix(3, 1);
     uint8_t **ans = generate_zero_matrix(3, 1);
 
-    gf_256_gaussian_elimination(A, B, 3, 1);
+    gf_256_gaussian_elimination(A, B, 1, 3);
     CU_ASSERT_EQUAL(0, compare_2Darray(B, ans, 3, 1));
     
     for (int i = 0; i < 3; i++) {

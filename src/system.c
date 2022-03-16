@@ -38,6 +38,7 @@ uint8_t *gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) 
 
 void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     // Gauss elimination
+    uint8_t *add_res;
     for (uint32_t k = 0; k < system_size; k++) {
         for (uint32_t i = k + 1; i < system_size; i++) {
             uint8_t factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
@@ -53,13 +54,19 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
                 // how we deal with error?
             }
 
-            A[i] = gf_256_full_add_vector(A[i], sub_line, system_size);
+            add_res = gf_256_full_add_vector(A[i], sub_line, system_size);
+
+            memcpy(A[i], add_res, system_size);
+            free(add_res);
 
             if (A[i] == NULL) {
                 // TODO 
             }
 
-            b[i] = gf_256_full_add_vector(b[i], b_sub_line, symbol_size);
+            add_res = gf_256_full_add_vector(b[i], b_sub_line, symbol_size);
+
+            memcpy(b[i], add_res, symbol_size);
+            free(add_res);
 
             if (b[i] == NULL) {
                 // TODO 
@@ -81,8 +88,10 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
             if (b_sub_line == NULL) {
                 // TODO 
             }
+            add_res = gf_256_full_add_vector(b[j], b_sub_line, symbol_size);
+            memcpy(b[j], add_res, symbol_size);
+            free(add_res);
 
-            b[j] = gf_256_full_add_vector(b[j], b_sub_line, symbol_size);
             free(b_sub_line);
 
             if (b[j] == NULL) {
@@ -90,7 +99,8 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
             }
         } while (j--);
 
-        b[i] = gf_256_inv_vector(b[i], A[i][i], symbol_size);
+        uint8_t* div_res = gf_256_inv_vector(b[i], A[i][i], symbol_size);
+        memcpy(b[i], div_res, symbol_size);
         if (b[i] == NULL) {
             // TODO 
         }

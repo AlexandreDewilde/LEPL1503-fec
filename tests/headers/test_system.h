@@ -1,7 +1,7 @@
 #ifndef TEST_SYSTEM
 #define TEST_SYSTEM
 #include "../../headers/system.h"
-#include "generate_samples.h"
+#include "tools.h"
 #include <CUnit/Basic.h>
 
 

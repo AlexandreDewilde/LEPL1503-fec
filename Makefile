@@ -14,14 +14,14 @@ clean:
 	rm -f fec
 	rm -f test_tinymt32
 
-tests: src/tinymt32.c src/system.c tests/generate_samples.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
+tests: src/tinymt32.c src/system.c tests/tools.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
 	$(CC) -o tests_suite $^ -lcunit
 	./tests_suite
 	
 clean_tests:
 	rm -f tests_suite
 
-speed_tests: src/tinymt32.c src/system.c tests/speed_tests/speed_tests.c
+speed_tests: src/tinymt32.c src/system.c tests/tools.c tests/speed_tests/speed_tests.c
 	$(CC) -o speed_tests.out $^
 	./speed_tests.out
 	
