@@ -15,7 +15,7 @@ clean:
 	rm -f test_tinymt32
 
 tests: src/tinymt32.c src/system.c tests/tools.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
-	$(CC) -o tests_suite $^ -lcunit
+	$(CC) -o tests_suite -g $^ -lcunit
 	./tests_suite
 	
 clean_tests:

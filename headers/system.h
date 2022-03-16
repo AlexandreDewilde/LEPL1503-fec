@@ -25,6 +25,15 @@ uint8_t *gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32_t s
 
 /**
  *
+ * Add two vectors in place in a Galois Field 256
+ * @param symbol_1: the first symbol to add
+ * @param symbol_2: the second symbol to add
+ * @param symbol_size: size of the two symbols (of the same size!)
+ */
+void inplace_gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32_t symbol_size);
+
+/**
+ *
  * Multiply a vector by a coefficient in a Galois Field 256
  * @param symbol: the symbol to multiply
  * @param coef: the coefficient of the scaling
@@ -35,6 +44,16 @@ uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
 
 /**
  *
+ * Multiply a vector by a coefficient inplace in a Galois Field 256
+ * @param symbol: the symbol to multiply
+ * @param coef: the coefficient of the scaling
+ * @param symbol_size: size of the symbol
+ * @return: a new vector of `symbol_size` byte containing the result of symbol * coef in GF(256)
+ */
+void inplace_gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
+
+/**
+ *
  * Divide a vector in a Galois Field 256 by a coefficient
  * @param symbol: the symbol to add
  * @param coef: the dividing coefficient
@@ -42,6 +61,16 @@ uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
  * @return: a new vector of `symbol_size` byte containing the result of symbol / coef in GF(256)
  */
 uint8_t *gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
+
+/**
+ *
+ * Divide a vector inplace in a Galois Field 256 by a coefficient
+ * @param symbol: the symbol to add
+ * @param coef: the dividing coefficient
+ * @param symbol_size: size of the two symbols (of the same size!)
+ * @return: a new vector of `symbol_size` byte containing the result of symbol / coef in GF(256)
+ */
+void inplace_gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
 
 /**
  *
