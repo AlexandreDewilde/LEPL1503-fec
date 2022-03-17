@@ -1,5 +1,29 @@
 #include "headers/tools.h"
 
+
+int compare_2Darray(uint8_t** arr1, uint8_t** arr2, uint32_t size_x, uint32_t size_y) {
+    for (uint32_t i = 0; i < size_x; i++) {
+        int res = memcmp(arr1[i], arr2[i], size_y);
+        if (res != 0) return res;
+    }
+    return 0;
+}
+
+uint8_t* generate_random_vector(uint32_t size) {
+    uint8_t *vector = malloc(size);
+    for (uint32_t i = 0; i < size; i++) {
+        vector[i] = (uint8_t) (rand() % 256);
+    }
+    return vector;
+}
+
+void fill_vector_random(uint8_t *vector, uint32_t size) {
+    for (uint32_t i = 0; i < size; i++) {
+        vector[i] = (uint8_t) (rand() % 256);
+    }
+}
+
+
 uint8_t **deep_copy(uint8_t **arr, uint32_t x, uint32_t y) {
     uint8_t **new_arr = malloc(x*sizeof(uint8_t*));
     for (uint32_t i = 0; i < x; i++) {
@@ -17,7 +41,15 @@ void fill_matrix(uint8_t **src, uint8_t **dest, uint32_t x, uint32_t y) {
     }
 }
 
-uint8_t** generate_zero_matrix(int x, int y) {
+uint8_t *generate_zero_vector(uint32_t size) {
+    uint8_t *vector = malloc(size);
+    for (uint32_t i = 0; i < size; i++) {
+        vector[i] = 0;
+    }
+    return vector;
+}
+
+uint8_t** generate_zero_matrix(uint32_t x, uint32_t y) {
     uint8_t **matrix = malloc(x*sizeof(uint8_t*));
     for (int i = 0; i < x; i++) {
         matrix[i] = malloc(y);

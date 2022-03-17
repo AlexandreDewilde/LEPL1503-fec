@@ -1,14 +1,5 @@
 #include "headers/test_system.h"
 
-
-int compare_2Darray(uint8_t** arr1, uint8_t** arr2, uint32_t size_x, uint32_t size_y) {
-    for (uint32_t i = 0; i < size_x; i++) {
-        int res = memcmp(arr1[i], arr2[i], size_y);
-        if (res != 0) return res;
-    }
-    return 0;
-}
-
 int system_setup() {
     return 0;
 }
@@ -18,9 +9,7 @@ int system_teardown() {
     return 0;
 }
 
-
-void test_gf_256_full_add_vector() {
-
+void test_gf_256_full_add_vector_simple_test() {
     // Simple basic test case
     uint8_t add_vector[] = {1,2,3,4};
     uint8_t add_vector2[] = {4,3,2,1};
@@ -28,6 +17,27 @@ void test_gf_256_full_add_vector() {
     uint8_t *res = gf_256_full_add_vector(add_vector, add_vector2, 4);
 
     CU_ASSERT_EQUAL(0, memcmp(res, ans, 4));
+    
+    free(res);
+}
+
+void test_gf_256_full_add_vector_random_test(uint32_t vector_size) {
+    uint8_t *random_vector1 = generate_random_vector(vector_size);
+    uint8_t *random_vector2 = generate_random_vector(vector_size);
+    uint8_t *res = gf_256_full_add_vector(random_vector1, random_vector2, vector_size);
+
+    for (uint32_t i = 0; i < vector_size; i++) {
+        CU_ASSERT_EQUAL(random_vector1[i]^random_vector2[i], res[i]);
+    }
+
+    free(res);
+    free(random_vector1);
+    free(random_vector2);
+}
+
+void test_gf_256_full_add_vector() {
+    test_gf_256_full_add_vector_simple_test();
+    test_gf_256_full_add_vector_random_test(100);
 }
 
 
