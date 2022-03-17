@@ -111,10 +111,15 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
     prng.tmat = 0x3793fdff;
     tinymt32_init(&prng, seed);
 
-    // TODO i think there is a better way to allocate 2d array that use cache si it's fastest
+    // make use of cache memory for perfomance
     uint8_t **coefs = malloc(nrs * sizeof(uint8_t *));
+    uint8_t *temp = malloc(nrs * nss);
+
     for (uint32_t i = 0; i < nrs; i++) {
-        coefs[i] = malloc(nss);
+        coefs[i] = temp + (i * nss);
+    }
+
+    for (uint32_t i = 0; i < nrs; i++) {
         if (coefs[i] == NULL) {
             return NULL;
         }
@@ -122,5 +127,6 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
             coefs[i][j] = (uint8_t) tinymt32_generate_uint32(&prng);
         }
     }
+
     return coefs;
 }

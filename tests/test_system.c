@@ -91,5 +91,11 @@ void test_gf_256_gaussian_elimination() {
 
 
 void test_gen_coefs() {
+    uint8_t** res = gen_coefs(42, 2, 2);
+    uint8_t ans[2][2] = {{171, 165}, {55, 61}};
+    CU_ASSERT_EQUAL(0, memcmp(res[0], ans[0], 2));
+    CU_ASSERT_EQUAL(0, memcmp(res[1], ans[1], 2));
 
+    free(res[0]);
+    free(res);
 }
