@@ -3,8 +3,9 @@
 
 int compare_2Darray(uint8_t** arr1, uint8_t** arr2, uint32_t size_x, uint32_t size_y) {
     for (uint32_t i = 0; i < size_x; i++) {
-        int res = memcmp(arr1[i], arr2[i], size_y);
-        if (res != 0) return res;
+        for (uint32_t j = 0; j < size_y; j++) {
+            if (arr1[i][j] != arr2[i][j]) return -1;
+        }
     }
     return 0;
 }

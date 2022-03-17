@@ -22,8 +22,10 @@ clean_tests:
 	rm -f tests_suite
 
 speed_tests: src/tinymt32.c src/system.c tests/tools.c tests/speed_tests/speed_tests.c
-	$(CC) -o speed_tests.out $^
-	./speed_tests.out
-	
+	$(CC) -o speed_tests $^
+	./speed_tests
+
+clean_speed_tests:
+	rm -f speed_tests
 # a .PHONY target forces make to execute the command even if the target already exists
 .PHONY: clean tests

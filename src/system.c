@@ -60,24 +60,13 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
     for (uint32_t k = 0; k < system_size; k++) {
         for (uint32_t i = k + 1; i < system_size; i++) {
             factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
-            sub_line = gf_256_mul_vector(A[k], factor, system_size);
-            if (sub_line == NULL) {
-                exit(EXIT_FAILURE);
-            }
+            inplace_gf_256_inv_vector(A[i], factor, system_size);
 
-            b_sub_line = gf_256_mul_vector(b[k], factor, symbol_size);
+            inplace_gf_256_inv_vector(b[i], factor, symbol_size);
 
-            if (b_sub_line == NULL) {
-                // TODO 
-                // how we deal with error?
-            }
+            inplace_gf_256_full_add_vector(A[i], A[k], system_size);
 
-            inplace_gf_256_full_add_vector(A[i], sub_line, system_size);
-
-            inplace_gf_256_full_add_vector(b[i], b_sub_line, symbol_size);
-
-            free(sub_line);
-            free(b_sub_line);
+            inplace_gf_256_full_add_vector(b[i], b[k], symbol_size);
         }
     }
 
