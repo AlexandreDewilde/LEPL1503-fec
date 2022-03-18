@@ -52,31 +52,28 @@ void inplace_gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_si
     }
 }
 
-
-void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
-    uint8_t factor;
-    uint8_t *sub_line, *b_sub_line;
-    // Gauss elimination
+void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     for (uint32_t k = 0; k < system_size; k++) {
         for (uint32_t i = k + 1; i < system_size; i++) {
-            factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
+            uint8_t factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
+            
             inplace_gf_256_inv_vector(A[i], factor, system_size);
-
             inplace_gf_256_inv_vector(b[i], factor, symbol_size);
 
             inplace_gf_256_full_add_vector(A[i], A[k], system_size);
-
             inplace_gf_256_full_add_vector(b[i], b[k], symbol_size);
         }
     }
+}
 
+void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     // Subsituation  arrière
     for (uint32_t k = 1; k < system_size; k++) {
         uint32_t i = system_size - k;
         uint32_t j = i - 1;
         do {
-            factor = gf256_mul_table[A[j][i]][gf256_inv_table[A[i][i]]];
-            b_sub_line = gf_256_mul_vector(b[i], factor, symbol_size);
+            uint8_t factor = gf256_mul_table[A[j][i]][gf256_inv_table[A[i][i]]];
+            uint8_t *b_sub_line = gf_256_mul_vector(b[i], factor, symbol_size);
 
             if (b_sub_line == NULL) {
                 // TODO 
@@ -89,6 +86,11 @@ void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size,
 
         inplace_gf_256_inv_vector(b[i], A[i][i], symbol_size);
     }
+}
+
+void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
+    gf_256_gaussian_elimination_forward(A, b, symbol_size, system_size);
+    gf_256_gaussian_elimination_backward(A, b, symbol_size, system_size);
 }
 
 
