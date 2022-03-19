@@ -70,21 +70,41 @@ void test_gf_256_gaussian_elimination_zero() {
 
 void test_gf_256_gaussian_elimination_basic() {
     // Basic test
-    uint8_t A[3][3] = { {1,2,3}, {5,5,6}, {11,8,9} };
-    uint8_t b[3][3] = { {0,1,2}, {1,1,1}, {2,2,2} };
-    uint8_t ans[3][3] = { {49, 142, 82}, {150, 142, 166}, {0, 122, 244} };
+    uint8_t A[4][4] = { {42, 84, 8, 220}, {10, 222, 3, 92}, {173, 66, 95, 5 }, {83, 198, 39, 92 } };
+    uint8_t b[4][6] = { {218, 199, 87, 225, 15, 18}, {6, 130, 239, 127, 79, 61}, {33, 59, 154, 23, 199, 158}, {250, 220, 212, 70, 1, 177 } };
+    uint8_t ans[4][6] = { {165, 168, 238, 27, 54, 152 }, {24, 36, 137, 64, 207, 181 }, {64, 30, 221, 57, 40, 229}, {14, 240, 94, 138, 110, 177 } };
     // Convert to double pointer **
-    uint8_t *A_double_pointers[3] = {A[0], A[1], A[2]};
-    uint8_t *b_double_pointers[3] = {b[0], b[1], b[2]};
-    uint8_t *ans_double_pointers[3] = {ans[0], ans[1], ans[2]};
+    uint8_t *A_double_pointers[4] = {A[0], A[1], A[2], A[3]};
+    uint8_t *b_double_pointers[4] = {b[0], b[1], b[2], b[3]};
+    uint8_t *ans_double_pointers[4] = {ans[0], ans[1], ans[2], ans[3]};
 
-    gf_256_gaussian_elimination(A_double_pointers, b_double_pointers, 3, 3);
-    CU_ASSERT_EQUAL(0, compare_2Darray(b_double_pointers, ans_double_pointers, 3, 3));
+    gf_256_gaussian_elimination(A_double_pointers, b_double_pointers, 6, 4);
+    CU_ASSERT_EQUAL(0, compare_2Darray(b_double_pointers, ans_double_pointers, 4, 6));
+}
+
+void test_gf_256_gaussian_elimination_file() {
+    uint32_t NB, *n, *b_size;
+    uint8_t ***A_matrices, ***B_matrices, ***solutions;
+    parse_matrix_file("tests/samples/systems.txt", &NB, &n, &b_size, &A_matrices, &B_matrices, &solutions);
+
+    for (uint32_t k = 0; k < NB; k++) {
+        printf("%d, %d\n", n[k], b_size[k]);
+
+        gf_256_gaussian_elimination(A_matrices[k], B_matrices[k], b_size[k], n[k]);
+        CU_ASSERT_EQUAL(0, compare_2Darray(B_matrices[k], solutions[k], n[k], b_size[k]));
+        for (uint32_t i = 0; i < n[k]; i++) {
+            for (uint32_t j = 0; j < b_size[k]; j++) {
+                printf("%d ", B_matrices[k][i][j]);
+            }
+            printf("\n");
+        }
+    }
 }
 
 void test_gf_256_gaussian_elimination() {
     test_gf_256_gaussian_elimination_zero();
     test_gf_256_gaussian_elimination_basic();
+    test_gf_256_gaussian_elimination_file();
 }
 
 
