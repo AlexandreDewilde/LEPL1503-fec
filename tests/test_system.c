@@ -59,11 +59,9 @@ void test_gf_256_gaussian_elimination_zero() {
     gf_256_gaussian_elimination(A, B, 1, 3);
     CU_ASSERT_EQUAL(0, compare_2Darray(B, ans, 3, 1));
     
-    for (int i = 0; i < 3; i++) {
-        free(A[i]);
-        free(B[i]);
-        free(ans[i]);
-    }
+    free(A[0]);
+    free(B[0]);
+    free(ans[0]);
     free(A);
     free(B);
     free(ans);

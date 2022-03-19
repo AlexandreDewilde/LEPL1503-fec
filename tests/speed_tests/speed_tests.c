@@ -40,15 +40,13 @@ void test_gf_256_gaussian_elimination_random(uint32_t matrix_size, uint32_t solu
         average_delta_time += get_delta_time(start, stop);
     }
 
-    for (uint32_t i = 0; i < matrix_size; i++) {
-        free(A[i]);
-        free(B[i]);
-    }
+    free(A[0]);
+    free(B[0]);
     free(A);
     free(B);
     average_delta_time /= repeat;
 
-    printf("Ended Testing speed of gaussian elimination on random matrices of size %dx%d average time : %lf on %d sample(s)\n", matrix_size, matrix_size, average_delta_time, repeat);
+    printf("Ended Testing speed of gaussian elimination on random matrices of size %dx%d and solution size of %dx%d, the average time : %lf on %d sample(s)\n", matrix_size, matrix_size, matrix_size, solutions_size, average_delta_time, repeat);
     
 }
 
@@ -76,10 +74,8 @@ void test_gf_256_gaussian_elimination(int repeat) {
 
         average_delta_time += get_delta_time(start, stop);
     }
-    for (uint32_t i = 0; i < 3; i++) {
-        free(current_A[i]);
-        free(current_b[i]);
-    }
+    free(current_A[0]);
+    free(current_b[0]);
     free(current_A);
     free(current_b);
 
@@ -90,5 +86,5 @@ void test_gf_256_gaussian_elimination(int repeat) {
 int main()
 {
     test_gf_256_gaussian_elimination(1000);
-    test_gf_256_gaussian_elimination_random(1000, 1000, 10);    
+    test_gf_256_gaussian_elimination_random(100, 100, 100);    
 }
