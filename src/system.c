@@ -68,19 +68,15 @@ void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symb
 
 void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     // Subsituation  arrière
-    for (uint32_t k = 1; k < system_size; k++) {
-        uint32_t i = system_size - k;
+    for (uint32_t i = system_size - 1; i > 0; i--) {
         uint32_t j = i - 1;
         do {
             uint8_t factor = gf256_mul_table[A[j][i]][gf256_inv_table[A[i][i]]];
-            uint8_t *b_sub_line = gf_256_mul_vector(b[i], factor, symbol_size);
+            
+            inplace_gf_256_mul_vector(b[i], factor, symbol_size);
+            A[i][i] = gf256_mul_table[A[i][i]][factor];
 
-            if (b_sub_line == NULL) {
-                // TODO 
-            }
-            inplace_gf_256_full_add_vector(b[j], b_sub_line, symbol_size);
-
-            free(b_sub_line);
+            inplace_gf_256_full_add_vector(b[j], b[i], symbol_size);
 
         } while (j--);
 
