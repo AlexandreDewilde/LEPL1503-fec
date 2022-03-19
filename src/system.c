@@ -70,7 +70,7 @@ void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t sym
     // Subsituation  arrière
     uint32_t i = system_size - 1;
     do {
-        int32_t j = i;
+        uint32_t j = i;
         while (j > 0) {
             j--;
             uint8_t factor = gf256_mul_table[A[j][i]][gf256_inv_table[A[i][i]]];
