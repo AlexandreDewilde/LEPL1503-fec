@@ -55,19 +55,29 @@ void inplace_gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_si
 void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     for (uint32_t k = 0; k < system_size; k++) {
         for (uint32_t i = k + 1; i < system_size; i++) {
+            if (A[i][k] == 0) continue;
             uint8_t factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
             
-            inplace_gf_256_inv_vector(A[i], factor, system_size);
-            inplace_gf_256_inv_vector(b[i], factor, symbol_size);
+            for (uint32_t j = 0; j < system_size; j++) {
+                A[i][j] ^= gf256_mul_table[A[k][j]][factor];
+            }
 
-            inplace_gf_256_full_add_vector(A[i], A[k], system_size);
-            inplace_gf_256_full_add_vector(b[i], b[k], symbol_size);
+            for (uint32_t j = 0; j < symbol_size; j++) {
+                b[i][j] ^= gf256_mul_table[b[k][j]][factor];
+            }
+            
+            
         }
     }
 }
 
 void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     // Subsituation  arrière
+    
+    // for (uint32_t i = 0; i < system_size; i++) {
+    //     for (uint32_t j = 0; j < system_size;j++) printf("%d ", A[i][j]);
+    //     printf("\n");
+    // }
     uint32_t i = system_size - 1;
     do {
         uint32_t j = i;
@@ -79,7 +89,6 @@ void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t sym
             A[i][i] = gf256_mul_table[A[i][i]][factor];
 
             inplace_gf_256_full_add_vector(b[j], b[i], symbol_size);
-            printf("%d\n", j);
         }
         inplace_gf_256_inv_vector(b[i], A[i][i], symbol_size);
     } while(i--);
@@ -108,9 +117,6 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
     }
 
     for (uint32_t i = 0; i < nrs; i++) {
-        if (coefs[i] == NULL) {
-            return NULL;
-        }
         for (uint32_t j = 0; j < nss; j++) {
             coefs[i][j] = (uint8_t) tinymt32_generate_uint32(&prng);
         }
