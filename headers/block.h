@@ -11,10 +11,11 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <math.h>
+#include "system.h"
+#include "message.h"
 
 typedef struct {
     uint32_t block_size, word_size, redudancy;
-    uint8_t **A;
     uint8_t **message;
     uint8_t **redudant_symbols;
 } block_t;

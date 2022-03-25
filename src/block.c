@@ -1,5 +1,4 @@
 #include "../headers/block.h"
-#include "../headers/system.h"
 
 void get_file_info(FILE *file, file_info_t *file_info) {
 
@@ -43,8 +42,6 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     for (uint32_t i = 0; i < block->redudancy; i++) {
         block->redudant_symbols[i] = temp + i * block->word_size;
     }
-
-
 }
 
 void make_block(FILE *file, block_t *block) {
@@ -60,6 +57,16 @@ void make_block(FILE *file, block_t *block) {
     }
 }
 
+void free_blocks(block_t *blocks, uint32_t nb_blocks) {
+    for (uint32_t i = 0; i < nb_blocks; i++) {
+        if (blocks[i].block_size) free(blocks[i].message[0]);
+        free(blocks[i].message);
+        if (blocks[i].redudancy) free(blocks[i].redudant_symbols[0]);
+        free(blocks[i].redudant_symbols);
+    }
+    free(blocks);
+}
+
 
 uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     uint32_t unknowns = 0;
@@ -72,6 +79,9 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
         if (!count) {
             unknown_indexes[i] = true;
             unknowns++;
+        }
+        else {
+            unknown_indexes[i] = false;
         }
     }
     return unknowns;
@@ -94,6 +104,9 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
     }
 }
 
+
+
+
 void process_block(block_t *block, uint8_t **coeffs) {
    
     bool *unknowns_indexes = malloc(block->block_size);
@@ -107,9 +120,9 @@ void process_block(block_t *block, uint8_t **coeffs) {
         A[i] = temp_alloc + i * block->word_size;
     }
     
-    uint8_t *temp_alloc2 = malloc(unknowns * block->word_size);
+    temp_alloc = malloc(unknowns * block->word_size);
     for (uint32_t i = 0; i < unknowns; i++) {
-        B[i] = temp_alloc2 + i * block->word_size;
+        B[i] = temp_alloc + i * block->word_size;
         memcpy(B[i], block->redudant_symbols[i], block->word_size);
     }
 
@@ -118,10 +131,51 @@ void process_block(block_t *block, uint8_t **coeffs) {
 
     uint32_t temp = 0;
     for (uint32_t i = 0; i < block->block_size; i++) {
-        if (unknowns_indexes[i]) block->message[i] = B[temp++];
+        if (unknowns_indexes[i]) {
+            memcpy(block->message[i], B[temp++], block->word_size);
+        }
     }
+
+    if (unknowns) free(A[0]);
+    if (unknowns) free(B[0]);
+    free(A);
+    free(B);
+    free(unknowns_indexes);
 }
 
+message_t *blocks_to_message_t(block_t *blocks, uint32_t nb_blocks, bool uncomplete_block, uint32_t block_size, uint32_t word_size, uint32_t remaining, uint32_t padding) {
+    message_t *message = malloc(sizeof(message_t));
+
+    message->length = (nb_blocks - uncomplete_block) * block_size * word_size;
+    if (uncomplete_block) {
+        message->length += (remaining - 1) * word_size + word_size - padding;
+    }
+
+    printf("%d\n", message->length);
+    message->message = malloc(message->length);
+
+    uint64_t idx = 0;
+
+    for (uint32_t i = 0; i < nb_blocks - uncomplete_block; i++) {
+        for (uint32_t j = 0; j < block_size; j++) {
+            for (uint32_t k = 0; k < word_size; k++) {
+                message->message[idx++] = blocks[i].message[j][k];
+            }
+        }
+    }
+
+    if (uncomplete_block) {
+        for (uint32_t j = 0; j < remaining - 1; j++) {
+            for (uint32_t k = 0; k < blocks[nb_blocks - 1].word_size; k++) {
+                message->message[idx++] = blocks[nb_blocks-1].message[j][k];
+            }
+        }
+        for (uint32_t j = 0; j < blocks[nb_blocks - 1].word_size - padding; j++) {
+            message->message[idx++] = blocks[nb_blocks-1].message[remaining-1][j];
+        }
+    }
+    return message;
+}
 
 void parse_file(FILE *file) {
     
@@ -158,24 +212,19 @@ void parse_file(FILE *file) {
         process_block(&blocks[nb_blocks-1], coeffs);
     }
 
+    message_t *message = blocks_to_message_t(blocks, nb_blocks, uncomplete_block, file_info.block_size, file_info.word_size, remaining, padding);
 
-    for (uint32_t i = 0; i < nb_blocks-1; i++) {
-        for (uint32_t j = 0; j < blocks[i].block_size; j++) {
-            for (uint32_t k = 0; k < blocks[i].word_size; k++) {
-                printf("%c", blocks[i].message[j][k]);
-            }
-        }
+    for (uint64_t i = 0; i < message->length; i++) {
+        printf("%c", message->message[i]);
     }
 
-    for (uint32_t j = 0; j < remaining - 1; j++) {
-        for (uint32_t k = 0; k < file_info.word_size; k++) {
-            printf("%c", blocks[nb_blocks-1].message[j][k]);
-        }
-    }
+    free_blocks(blocks, nb_blocks);
+    free(coeffs[0]);
+    free(coeffs);
+    free(message->message);
+    free(message);
 
-    for (uint32_t j = 0; j < file_info.word_size - padding; j++) {
-        printf("%c", blocks[nb_blocks-1].message[remaining-1][j]);
-    }
+
 }
 
 
@@ -183,4 +232,5 @@ int main() {
     block_t *blocks;
     FILE *f = fopen("samples/africa.bin", "rb");
     parse_file(f);
+    fclose(f);
 }

@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-Wall -Werror -g
-LIBS=-lcunit -lpthread
+LIBS=-lcunit -lpthread -lm
 INCLUDE_HEADERS_DIRECTORY=-Iheaders
 
 fec: src/tinymt32.c src/system.c main.c    # add your other object files needed to compile your program here. !! The ordering is important !! if file_a.o depends on file_b.o, file_a.o must be placed BEFORE file_b.o in the list !
@@ -15,14 +15,14 @@ clean:
 	rm -f test_tinymt32
 
 tests: src/tinymt32.c src/system.c tests/tools.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
-	$(CC) -o tests_suite -g $^ -lcunit
+	$(CC) -o tests_suite -g $^ $(LIBS) $(CFLAGS)
 	./tests_suite
 	
 clean_tests:
 	rm -f tests_suite
 
 speed_tests: src/tinymt32.c src/system.c tests/tools.c tests/speed_tests/speed_tests.c
-	$(CC) -o speed_tests $^ -O3
+	$(CC) -o speed_tests $^ -O3 -lm $(CFLAGS)
 	./speed_tests
 
 clean_speed_tests:
