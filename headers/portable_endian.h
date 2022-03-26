@@ -27,6 +27,9 @@
 
 #else
 #include <endian.h>
+#include <bits/byteswap.h>
+#define be32toh(x) __bswap_32(x)
+#define be64toh(x) __bswap_64(x)
 
 #endif /* __APPLE__ */
 
