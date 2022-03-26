@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Werror -g -std=gnu17 #CHECK IF GNU works on OSX, I use gnu 17 beceause it implements getline function
+CFLAGS=-Wall -Werror
 LIBS=-lcunit -lpthread -lm
 INCLUDE_HEADERS_DIRECTORY=-Iheaders
 

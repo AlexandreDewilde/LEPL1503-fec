@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <portable_endian.h>
 #include <math.h>
 #include "system.h"
 #include "message.h"

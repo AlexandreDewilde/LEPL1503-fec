@@ -5,12 +5,16 @@
 #include <dirent.h>
 #include <errno.h>
 #include <getopt.h>
-#include <limits.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include "headers/tinymt32.h"
 #include "headers/system.h"
 #include "headers/block.h"
+#ifdef __APPLE__
+#include <limits.h>
+#else
+#include <linux/limits.h>
+#endif
 
 typedef struct
 {
