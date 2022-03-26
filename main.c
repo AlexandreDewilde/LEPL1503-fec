@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "headers/tinymt32.h"
 #include "headers/system.h"
+#include "headers/block.h"
 
 typedef struct
 {
@@ -139,9 +140,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Successfully opened the file %s\n", full_path);
         }
 
-        // TODO: parse the input binary file, decode the encoded message with RLC and write the output in the output stream following the statement
-        
-
+        parse_file(input_file, args.output_stream);
         // Close this instance file
         fclose(input_file);
     }

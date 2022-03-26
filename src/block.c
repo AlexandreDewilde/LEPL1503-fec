@@ -112,35 +112,52 @@ void process_block(block_t *block, uint8_t **coeffs) {
     bool *unknowns_indexes = malloc(block->block_size);
     uint32_t unknowns = find_lost_words(block, unknowns_indexes);
 
-    uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
-    uint8_t **B = malloc(unknowns * sizeof(uint8_t *));
+    if (unknowns) {
+        uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
+        uint8_t **B = malloc(unknowns * sizeof(uint8_t *));
 
-    uint8_t *temp_alloc = malloc(unknowns * block->word_size);
-    for (uint32_t i = 0; i < unknowns; i++) {
-        A[i] = temp_alloc + i * block->word_size;
-    }
-    
-    temp_alloc = malloc(unknowns * block->word_size);
-    for (uint32_t i = 0; i < unknowns; i++) {
-        B[i] = temp_alloc + i * block->word_size;
-        memcpy(B[i], block->redudant_symbols[i], block->word_size);
-    }
-
-    make_linear_system(A, B, unknowns_indexes, unknowns, block, coeffs);
-    gf_256_gaussian_elimination(A, B, block->word_size, unknowns);
-
-    uint32_t temp = 0;
-    for (uint32_t i = 0; i < block->block_size; i++) {
-        if (unknowns_indexes[i]) {
-            memcpy(block->message[i], B[temp++], block->word_size);
+        uint8_t *temp_alloc = malloc(unknowns * block->word_size);
+        for (uint32_t i = 0; i < unknowns; i++) {
+            A[i] = temp_alloc + i * block->word_size;
         }
-    }
+        
+        temp_alloc = malloc(unknowns * block->word_size);
+        for (uint32_t i = 0; i < unknowns; i++) {
+            B[i] = temp_alloc + i * block->word_size;
+            memcpy(B[i], block->redudant_symbols[i], block->word_size);
+        }
 
-    if (unknowns) free(A[0]);
-    if (unknowns) free(B[0]);
-    free(A);
-    free(B);
+        make_linear_system(A, B, unknowns_indexes, unknowns, block, coeffs);
+        gf_256_gaussian_elimination(A, B, block->word_size, unknowns);
+
+        uint32_t temp = 0;
+        for (uint32_t i = 0; i < block->block_size; i++) {
+            if (unknowns_indexes[i]) {
+                memcpy(block->message[i], B[temp++], block->word_size);
+            }
+        }
+
+        free(A[0]);
+        free(B[0]);
+        free(A);
+        free(B);
+    }
     free(unknowns_indexes);
+}
+
+
+void write_block(block_t *block, FILE *output) {
+    for (uint32_t j = 0; j < block->block_size; j++) {
+        fwrite(block->message[j], block->word_size, 1, output);
+    }
+}
+
+
+void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding) {
+    for (uint32_t j = 0; j < remaining - 1; j++) {
+        fwrite(block->message[j], block->word_size, 1, output);
+    }
+    fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
 }
 
 message_t *blocks_to_message_t(block_t *blocks, uint32_t nb_blocks, bool uncomplete_block, uint32_t block_size, uint32_t word_size, uint32_t remaining, uint32_t padding) {
@@ -151,7 +168,6 @@ message_t *blocks_to_message_t(block_t *blocks, uint32_t nb_blocks, bool uncompl
         message->length += (remaining - 1) * word_size + word_size - padding;
     }
 
-    printf("%d\n", message->length);
     message->message = malloc(message->length);
 
     uint64_t idx = 0;
@@ -177,7 +193,7 @@ message_t *blocks_to_message_t(block_t *blocks, uint32_t nb_blocks, bool uncompl
     return message;
 }
 
-void parse_file(FILE *file) {
+void parse_file(FILE *file, FILE *output) {
     
     file_info_t file_info;
     get_file_info(file, &file_info);
@@ -199,9 +215,9 @@ void parse_file(FILE *file) {
         prepare_block(&blocks[i], file_info.block_size, file_info.word_size, file_info.redudancy);
         make_block(file, &blocks[i]);
         process_block(&blocks[i], coeffs);
+        write_block(&blocks[i], output);
     }
 
-    uint32_t unread = file_info.file_size + 24 - ftell(file);
     uint32_t remaining = ( (file_info.file_size + 24 - ftell(file)) / file_info.word_size) - file_info.redudancy;
 
     uint32_t padding = (file_info.block_size * file_info.word_size * (nb_blocks - 1)) + remaining * file_info.word_size - file_info.message_size;
@@ -210,27 +226,11 @@ void parse_file(FILE *file) {
         prepare_block(&blocks[nb_blocks-1], remaining, file_info.word_size, file_info.redudancy);
         make_block(file, &blocks[nb_blocks-1]);
         process_block(&blocks[nb_blocks-1], coeffs);
+        write_last_block(&blocks[nb_blocks-1], output, remaining, padding);
     }
 
-    message_t *message = blocks_to_message_t(blocks, nb_blocks, uncomplete_block, file_info.block_size, file_info.word_size, remaining, padding);
-
-    for (uint64_t i = 0; i < message->length; i++) {
-        printf("%c", message->message[i]);
-    }
 
     free_blocks(blocks, nb_blocks);
     free(coeffs[0]);
     free(coeffs);
-    free(message->message);
-    free(message);
-
-
-}
-
-
-int main() {
-    block_t *blocks;
-    FILE *f = fopen("samples/africa.bin", "rb");
-    parse_file(f);
-    fclose(f);
 }

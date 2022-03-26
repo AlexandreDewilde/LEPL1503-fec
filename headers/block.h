@@ -1,6 +1,5 @@
 #ifndef BLOCK_H
 #define BLOCK_H
-#include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
@@ -35,7 +34,9 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
 
 void process_block(block_t *block, uint8_t **coeffs);
 
-void parse_file(FILE *file);
+message_t *blocks_to_message_t(block_t *blocks, uint32_t nb_blocks, bool uncomplete_block, uint32_t block_size, uint32_t word_size, uint32_t remaining, uint32_t padding);
+
+void parse_file(FILE *file, FILE *output);
 
 
 #endif /* BLOCK_H */
