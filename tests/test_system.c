@@ -1,6 +1,6 @@
 #include "headers/test_system.h"
 
-int system_setup() {
+int system_setup() { 
     return 0;
 }
 
@@ -40,14 +40,74 @@ void test_gf_256_full_add_vector() {
     test_gf_256_full_add_vector_random_test(100);
 }
 
+void test_gf_256_mul_vector_simple_test(){
+    uint8_t coef =0;
+    uint8_t  symbol[]= {1,2,3,4};
+    uint32_t symbol_size = 4;
 
-void test_gf_256_mul_vector() {
+    uint8_t result[] = {0, 0, 0, 0};
+    uint8_t *r_symbole= gf_256_mul_vector(symbol,coef,symbol_size);
+    for (int i = 0; i < symbol_size; i++){
+        CU_ASSERT_EQUAL(r_symbole[i],result[i]);
+    }  
 
+    coef=3;
+    uint8_t result1[] = {3, 6, 5, 12};
+    uint8_t *r_symbole1= gf_256_mul_vector(symbol,coef,symbol_size);
+    for (int i = 0; i < symbol_size; i++){
+        CU_ASSERT_EQUAL(r_symbole1[i],result1[i]);
+    }
+    uint8_t coefs=25;
+    uint8_t symboles[] = {77,25,103,200,45,120,77,100,255};
+    uint32_t symbol_sizes=9; 
+    uint8_t *r_symboles= gf_256_mul_vector(symboles,coefs,symbol_sizes);
+    uint8_t result2[] ={187,92,70,218,178,76,187,109,31};
+    for (int i = 0; i < symbol_sizes; i++){
+        CU_ASSERT_EQUAL(r_symboles[i],result2[i]);
+    }
 }
 
+void test_gf_256_mul_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_t nss, uint32_t nrs){
+    uint8_t *random_vector1 = generate_random_vector(size_vec);
+    //uint8_t random_vector2 = generate_random_vector(size_vec);
+    uint8_t coef =**gen_coefs(seed,nss,nrs);
+    
+    uint8_t *res=gf_256_mul_vector(random_vector1,coef,size_vec);
+    for (uint32_t i = 0; i < size_vec; i++){
+        CU_ASSERT_EQUAL(gf256_mul_table[coef][random_vector1[i]],res[i]);
+    }
+    free(random_vector1);
+    free(res);
+}
+
+void test_gf_256_mul_vector() {
+    test_gf_256_mul_vector_simple_test();
+    test_gf_256_mul_vector_random_test(45,42,30,10);
+    test_gf_256_mul_vector_random_test(100,0,20,10);
+    test_gf_256_mul_vector_random_test(500,100,2,2);
+}
+
+void test_gf_256_inv_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_t nss, uint32_t nrs){
+    uint8_t *random_vector =generate_random_vector(size_vec);
+    uint8_t coef =**gen_coefs(seed,nss,nrs);
+    
+    uint8_t *res=gf_256_mul_vector(random_vector,coef,size_vec);
+    for (uint32_t i = 0; i < size_vec; i++){
+        CU_ASSERT_EQUAL(gf256_mul_table[coef][random_vector[i]],res[i]);
+    }
+    free(random_vector);
+    free(res);
+}
 
 void test_gf_256_inv_vector() {
-
+    uint8_t coefs=25;
+    uint8_t symboles[] = {77,25,103,200,45,120,77,100,255};
+    uint32_t symbol_sizes=9;
+    uint8_t *r_symboles= gf_256_inv_vector(symboles,coefs,symbol_sizes);
+    uint8_t result2[] ={166,1,123,8,253,132,166,4,139};
+    for (int i = 0; i < symbol_sizes; i++){
+        CU_ASSERT_EQUAL(r_symboles[i],result2[i]);
+    } 
 }
 
 void test_gf_256_gaussian_elimination_zero() {
@@ -88,15 +148,15 @@ void test_gf_256_gaussian_elimination_file() {
     parse_matrix_file("tests/samples/systems.txt", &NB, &n, &b_size, &A_matrices, &B_matrices, &solutions);
 
     for (uint32_t k = 0; k < NB; k++) {
-        printf("%d, %d\n", n[k], b_size[k]);
+        //printf("%d, %d\n", n[k], b_size[k]);
 
         gf_256_gaussian_elimination(A_matrices[k], B_matrices[k], b_size[k], n[k]);
         CU_ASSERT_EQUAL(0, compare_2Darray(B_matrices[k], solutions[k], n[k], b_size[k]));
         for (uint32_t i = 0; i < n[k]; i++) {
             for (uint32_t j = 0; j < b_size[k]; j++) {
-                printf("%d ", B_matrices[k][i][j]);
+                //printf("%d ", B_matrices[k][i][j]);
             }
-            printf("\n");
+            //printf("\n");
         }
     }
 }
