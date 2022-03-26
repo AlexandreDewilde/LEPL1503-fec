@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Werror --std=c99
+CFLAGS=-Wall -Werror --std=gnu99
 LIBS=-lcunit -lpthread -lm
 INCLUDE_HEADERS_DIRECTORY=-Iheaders
 
