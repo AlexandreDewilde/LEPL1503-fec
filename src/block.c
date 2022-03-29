@@ -6,8 +6,8 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     file_info->file_size = ftell(file) - 24;
     rewind(file);
 
-    int res = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
-    if (res == -1) exit(-1);
+    int res1 = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
+    if (res1 == -1) exit(-1);
     file_info->seed = be32toh(file_info->seed);
 
     int res2 = fread(&(file_info->block_size), sizeof(uint32_t), 1, file);
