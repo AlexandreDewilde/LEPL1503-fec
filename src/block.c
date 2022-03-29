@@ -6,19 +6,24 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     file_info->file_size = ftell(file) - 24;
     rewind(file);
 
-    fread(&(file_info->seed), sizeof(uint32_t), 1, file);
+    int res = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
+    if (res == -1) exit(-1);
     file_info->seed = be32toh(file_info->seed);
 
-    fread(&(file_info->block_size), sizeof(uint32_t), 1, file);
+    int res2 = fread(&(file_info->block_size), sizeof(uint32_t), 1, file);
+    if (res2 == -1) exit(-1);
     file_info->block_size = be32toh(file_info->block_size);
 
-    fread(&(file_info->word_size), sizeof(uint32_t), 1, file);
+    int res3 = fread(&(file_info->word_size), sizeof(uint32_t), 1, file);
+    if (res3 == -1) exit(-1);
     file_info->word_size = be32toh(file_info->word_size);
 
-    fread(&(file_info->redudancy), sizeof(uint32_t), 1, file);
+    int res4 = fread(&(file_info->redudancy), sizeof(uint32_t), 1, file);
+    if (res4 == -1) exit(-1);
     file_info->redudancy = be32toh(file_info->redudancy);
 
-    fread(&(file_info->message_size), sizeof(uint64_t), 1, file);
+    int res5 = fread(&(file_info->message_size), sizeof(uint64_t), 1, file);
+    if (res5 == -1) exit(-1);
     file_info->message_size = be64toh(file_info->message_size);
 }
 
@@ -49,11 +54,13 @@ void make_block(FILE *file, block_t *block) {
     // Read message from file
     // TODO see if we can replace the loop by adpting agrs of fread
     for (uint8_t i = 0; i < block->block_size; i++) {
-        fread(block->message[i], block->word_size, 1, file);
+        int res = fread(block->message[i], block->word_size, 1, file);
+        if (res == -1) exit(-1);
     }
 
     for (uint8_t i = 0; i < block->redudancy; i++) {
-        fread(block->redudant_symbols[i], block->word_size, 1, file);
+        int res = fread(block->redudant_symbols[i], block->word_size, 1, file);
+        if (res == -1);
     }
 }
 
