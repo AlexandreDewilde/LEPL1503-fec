@@ -1,5 +1,13 @@
 #include "../headers/system.h"
 
+
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 uint8_t *gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32_t symbol_size) {
     uint8_t *add_vector = (uint8_t *) malloc(symbol_size);
     if (add_vector == NULL) {
@@ -11,12 +19,26 @@ uint8_t *gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32_t s
     return add_vector;
 }
 
+
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void inplace_gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32_t symbol_size) {
     for (uint32_t i = 0; i < symbol_size; i++) {
         symbol_1[i] ^= symbol_2[i];
     }
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     uint8_t *mul_vector = (uint8_t *) malloc(symbol_size);
@@ -28,6 +50,14 @@ uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) 
     }
     return mul_vector;
 }
+
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void inplace_gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     for (uint32_t i = 0; i < symbol_size; i++) {
@@ -46,11 +76,26 @@ uint8_t *gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) 
     return inv_vector;
 }
 
+
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void inplace_gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     for (uint32_t i = 0; i < symbol_size; i++) {
         symbol[i] = gf256_mul_table[symbol[i]][gf256_inv_table[coef]];
     }
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     for (uint32_t k = 0; k < system_size; k++) {
@@ -71,6 +116,13 @@ void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symb
     }
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     // Subsituation  arrière
     
@@ -90,6 +142,13 @@ void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t sym
 
     } while(i--);
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     gf_256_gaussian_elimination_forward(A, b, symbol_size, system_size);

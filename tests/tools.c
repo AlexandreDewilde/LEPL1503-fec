@@ -1,5 +1,11 @@
 #include "headers/tools.h"
 
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 int compare_2Darray(uint8_t** arr1, uint8_t** arr2, uint32_t size_x, uint32_t size_y) {
     for (uint32_t i = 0; i < size_x; i++) {
@@ -10,6 +16,14 @@ int compare_2Darray(uint8_t** arr1, uint8_t** arr2, uint32_t size_x, uint32_t si
     return 0;
 }
 
+
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 uint8_t* generate_random_vector(uint32_t size) {
     uint8_t *vector = malloc(size);
     for (uint32_t i = 0; i < size; i++) {
@@ -18,12 +32,25 @@ uint8_t* generate_random_vector(uint32_t size) {
     return vector;
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void fill_vector_random(uint8_t *vector, uint32_t size) {
     for (uint32_t i = 0; i < size; i++) {
         vector[i] = (uint8_t) (rand() % 256);
     }
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 uint8_t **deep_copy(uint8_t **arr, uint32_t x, uint32_t y) {
     uint8_t **matrix = malloc(x * sizeof(uint8_t *));
@@ -35,6 +62,13 @@ uint8_t **deep_copy(uint8_t **arr, uint32_t x, uint32_t y) {
     return matrix;
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void fill_matrix(uint8_t **src, uint8_t **dest, uint32_t x, uint32_t y) {
     for (uint32_t i = 0; i < x; i++) {
         for (uint32_t j = 0; j < y; j++) {
@@ -43,6 +77,13 @@ void fill_matrix(uint8_t **src, uint8_t **dest, uint32_t x, uint32_t y) {
     }
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 uint8_t *generate_zero_vector(uint32_t size) {
     uint8_t *vector = malloc(size);
     for (uint32_t i = 0; i < size; i++) {
@@ -50,6 +91,13 @@ uint8_t *generate_zero_vector(uint32_t size) {
     }
     return vector;
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 uint8_t** generate_zero_matrix(uint32_t x, uint32_t y) {
     uint8_t **matrix = malloc(x * sizeof(uint8_t *));
@@ -61,6 +109,13 @@ uint8_t** generate_zero_matrix(uint32_t x, uint32_t y) {
     return matrix;
 }
 
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 uint8_t **random_matrix(uint32_t n, uint32_t m) {
     uint8_t **matrix = malloc(n * sizeof(uint8_t *));
@@ -74,6 +129,13 @@ uint8_t **random_matrix(uint32_t n, uint32_t m) {
     return matrix;
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void fill_matrix_random(uint8_t **matrix, uint32_t n, uint32_t m) {
     for (uint32_t i = 0; i < n; i++) {
         for (uint32_t j = 0; j < m; j++) {
@@ -82,6 +144,13 @@ void fill_matrix_random(uint8_t **matrix, uint32_t n, uint32_t m) {
     }
 }
 
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void getline_naive(char* line, size_t *len, FILE *file) {
     fgets(line, 256, file);
@@ -92,6 +161,13 @@ void getline_naive(char* line, size_t *len, FILE *file) {
     *len = i;
     line[i] = '\0';
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void parse_matrix_file(const char *filename, uint32_t *NB, uint32_t **n, uint32_t **b_size, uint8_t ****A_matrices, uint8_t ****b_matrices, uint8_t ****solutions) {
 

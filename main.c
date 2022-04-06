@@ -20,6 +20,13 @@ typedef struct
     bool verbose;
 } args_t;
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void usage(char *prog_name)
 {
     fprintf(stderr, "USAGE:\n");
@@ -29,6 +36,13 @@ void usage(char *prog_name)
     fprintf(stderr, "    -n n_threads (default: 4): set the number of computing threads that will be used to execute the RLC algorithm\n");
     fprintf(stderr, "    -v : enable debugging messages. If not set, no such messages will be displayed (except error messages on failure)\n");
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 int parse_args(args_t *args, int argc, char *argv[])
 {
@@ -87,6 +101,13 @@ int parse_args(args_t *args, int argc, char *argv[])
 
     return 0;
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 int main(int argc, char *argv[])
 {

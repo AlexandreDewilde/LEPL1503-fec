@@ -5,19 +5,47 @@
 #include "../../headers/system.h"
 
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void start_time(struct timeval *start) {
     // From https://stackoverflow.com/questions/10192903/time-in-milliseconds-in-c
     gettimeofday(start, NULL);
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void end_time(struct timeval *end) {
     gettimeofday(end, NULL);    
 }
+
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 double get_delta_time(struct timeval start, struct timeval end) {
     return (double) (end.tv_usec - start.tv_usec) / 1000000 + (double)(end.tv_sec - start.tv_sec);
 }
 
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void test_gf_256_gaussian_elimination_random(uint32_t matrix_size, uint32_t solutions_size, uint32_t repeat) {
     struct timeval stop, start;
@@ -49,6 +77,13 @@ void test_gf_256_gaussian_elimination_random(uint32_t matrix_size, uint32_t solu
     printf("Ended Testing speed of gaussian elimination on random matrices of size %dx%d and solution size of %dx%d, the average time : %lf on %d sample(s)\n", matrix_size, matrix_size, matrix_size, solutions_size, average_delta_time, repeat);
     
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void test_gf_256_gaussian_elimination(int repeat) {
     struct timeval stop, start;

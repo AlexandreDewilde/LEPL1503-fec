@@ -3,9 +3,23 @@
 #include <CUnit/Basic.h>
 
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void generate_tinymt32_suite(CU_pSuite suite) {
     CU_add_test(suite, "correct_coeffs", test_tinymt32_gen_42);
 }
+
+/**
+*
+*
+* @param
+* @return: 
+*/
 
 void generate_system_suite(CU_pSuite suite) {
     CU_add_test(suite, "Correct vector addition", test_gf_256_full_add_vector);

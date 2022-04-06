@@ -1,5 +1,12 @@
 #include "./headers/test_tinymt32.h"
 
+/**
+*
+*
+* @param
+* @return: 
+*/
+
 void test_tinymt32_gen_42()
 {
     tinymt32_t prng;
