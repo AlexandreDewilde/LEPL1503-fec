@@ -1,5 +1,6 @@
 #include "./headers/test_tinymt32.h"
 #include "./headers/test_system.h"
+#include "../headers/debug.h"
 #include <CUnit/Basic.h>
 
 
@@ -15,8 +16,12 @@ void generate_system_suite(CU_pSuite suite) {
     CU_add_test(suite, "Correct coeffs gen", test_gen_coefs);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
+    if((argc == 2) && (strncmp(argv[1], "-v", 2) == 0)){
+        
+        ACTIVATE_DEBUG();
+    }
     if (CUE_SUCCESS != CU_initialize_registry())
         return CU_get_error();
 

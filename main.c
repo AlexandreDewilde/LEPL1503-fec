@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include "headers/tinymt32.h"
 #include "headers/system.h"
+#include "headers/debug.h"
 
 typedef struct
 {
@@ -53,6 +54,7 @@ int parse_args(args_t *args, int argc, char *argv[])
             break;
         case 'v':
             args->verbose = true;
+            ACTIVATE_DEBUG();
             break;
         case 'f':
             args->output_stream = fopen(optarg, "w");
@@ -133,11 +135,9 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Failed to open the input file %s: %s\n", full_path, strerror(errno));
             goto file_read_error;
         }
-        if (args.verbose)
-        {
-            // This is a simple example of how to use the verbose mode
-            fprintf(stderr, "Successfully opened the file %s\n", full_path);
-        }
+
+        // This is a simple example of how to use the verbose mode
+        DEBUG("Successfully opened the file %s\n", full_path);
 
         // TODO: parse the input binary file, decode the encoded message with RLC and write the output in the output stream following the statement
         
@@ -156,10 +156,8 @@ int main(int argc, char *argv[])
         // Do not forget that we use byte values, so we have to
         // cast the uint32_t returned value to only keep the last 8 bits.
         uint8_t coef = (uint8_t)tinymt32_generate_uint32(&prng);
-        if (args.verbose)
-        {
-            printf("Coefficient: %u\n", coef);
-        }
+        DEBUG("Coefficient: %u\n", coef);
+       
 
         // Close this instance file
         fclose(input_file);
