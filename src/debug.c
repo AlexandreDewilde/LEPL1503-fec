@@ -18,12 +18,15 @@ void DEBUG(const char *restrict format, ...){
 }
 //Ce DEBUG imprime le vecteur donné
 void DEBUG_VECTOR(uint8_t *vector, uint32_t vector_size){
-    fprintf(stderr, "This is the vector: ");
-    for(uint32_t i = 0; i < vector_size; i++){
-        fprintf(stderr,"%d", *vector);
-        vector++;
+    if (SIGNAL){
+        fprintf(stderr, "This is the vector: ");
+        for(uint32_t i = 0; i < vector_size; i++){
+            fprintf(stderr,"%d", *vector);
+            vector++;
+        }
+        fprintf(stderr, "\n");
     }
-    fprintf(stderr, "\n");
+    
 }
 
 void ACTIVATE_DEBUG(){

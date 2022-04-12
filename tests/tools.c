@@ -95,7 +95,7 @@ void parse_matrix_file(const char *filename, uint32_t *NB, uint32_t **n, uint32_
         return;
     }
 
-    getline(&line, &len, fp);
+    getline(&line, &len, fp); // Why don't we use the result of getline? + where do we free it?
     *NB = strtoul(line, NULL, 10);
 
     *A_matrices = malloc(*NB*sizeof(uint8_t***));
