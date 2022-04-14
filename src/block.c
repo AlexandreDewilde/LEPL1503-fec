@@ -6,6 +6,7 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     file_info->file_size = ftell(file) - 24;
     rewind(file);
 
+
     int res1 = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
     if (res1 == -1) exit(-1);
     file_info->seed = be32toh(file_info->seed);
@@ -33,6 +34,7 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     block->block_size = block_size;
     block->word_size = word_size;
     block->redudancy = redudancy;
+    
 
     // Allocate 2D array to store information
     block->message = malloc(block->block_size * sizeof(uint8_t*));
@@ -47,6 +49,7 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     for (uint32_t i = 0; i < block->redudancy; i++) {
         block->redudant_symbols[i] = temp + i * block->word_size;
     }
+    
 }
 
 void make_block(FILE *file, block_t *block) {
@@ -54,13 +57,13 @@ void make_block(FILE *file, block_t *block) {
     // Read message from file
     // TODO see if we can replace the loop by adpting agrs of fread
     for (uint8_t i = 0; i < block->block_size; i++) {
-        int res = fread(block->message[i], block->word_size, 1, file);
+        int res = fread(block->message[i], block->word_size, block->block_size, file);
         if (res == -1) exit(-1);
     }
 
     for (uint8_t i = 0; i < block->redudancy; i++) {
         int res = fread(block->redudant_symbols[i], block->word_size, 1, file);
-        if (res == -1);
+        if (res == -1)exit(-1);
     }
 }
 
@@ -83,7 +86,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
         for (uint32_t j = 0; j < block->word_size;j++) {
             count += block->message[i][j];
         }
-        if (!count) {
+        if (count==0) {
             unknown_indexes[i] = true;
             unknowns++;
         }
@@ -91,6 +94,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
             unknown_indexes[i] = false;
         }
     }
+    printf("%d",unknowns);
     return unknowns;
 }
 
@@ -133,7 +137,7 @@ void process_block(block_t *block, uint8_t **coeffs) {
             B[i] = temp_alloc + i * block->word_size;
             memcpy(B[i], block->redudant_symbols[i], block->word_size);
         }
-
+        
         make_linear_system(A, B, unknowns_indexes, unknowns, block, coeffs);
         gf_256_gaussian_elimination(A, B, block->word_size, unknowns);
 

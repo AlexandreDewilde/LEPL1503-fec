@@ -102,9 +102,9 @@ uint8_t *generate_zero_vector(uint32_t size) {
 uint8_t** generate_zero_matrix(uint32_t x, uint32_t y) {
     uint8_t **matrix = malloc(x * sizeof(uint8_t *));
     uint8_t *temp = malloc(x * y);
-    for (int i = 0; i < x; i++) {
+    for (uint32_t i = 0; i < x; i++) {
         matrix[i] = temp + (i * y);
-        for (int j = 0; j < y; j++) matrix[i][j] = 0;
+        for (uint32_t j = 0; j < y; j++) matrix[i][j] = 0;
     }
     return matrix;
 }

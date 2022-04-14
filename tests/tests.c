@@ -1,5 +1,6 @@
 #include "./headers/test_tinymt32.h"
 #include "./headers/test_system.h"
+#include "./headers/test_block.h"
 #include <CUnit/Basic.h>
 
 
@@ -29,6 +30,15 @@ void generate_system_suite(CU_pSuite suite) {
     CU_add_test(suite, "Correct coeffs gen", test_gen_coefs);
 }
 
+
+void generate_block_suite(CU_pSuite suite){
+    CU_add_test(suite, "test_get_info", test_get_file_info);
+    CU_add_test(suite, "get_lost_words", test_find_lost_words);
+    
+}
+
+
+
 int main()
 {
     if (CUE_SUCCESS != CU_initialize_registry())
@@ -39,6 +49,11 @@ int main()
 
     CU_pSuite system_suite = CU_add_suite("system", system_setup, system_teardown);
     generate_system_suite(system_suite);
+
+    CU_pSuite block_suite = CU_add_suite("block", system_setup, system_teardown);
+    generate_block_suite(block_suite);
+
+
     CU_basic_run_tests();
     CU_basic_show_failures(CU_get_failure_list());
 }
