@@ -1,4 +1,5 @@
 #include "headers/test_system.h"
+#include "../headers/debug.h"
 
 int system_setup() { 
     return 0;
@@ -23,9 +24,16 @@ void test_gf_256_full_add_vector_simple_test() {
     uint8_t ans[] = {5,1,1,5};
     uint8_t *res = gf_256_full_add_vector(add_vector, add_vector2, 4);
 
-    CU_ASSERT_EQUAL(0, memcmp(res, ans, 4));
     
+    CU_ASSERT_EQUAL(0, memcmp(res, ans, 4));
+    uint8_t *ptr_res = &(*res); 
+
+    //DEBUG_VECTOR imprime le vecteur res calculé
+    DEBUG_VECTOR(ptr_res, 4);
+
     free(res);
+    
+    DEBUG("The function est_gf_256_full_add_vector_simple_test was executed"); //This is just a test of debug (verbose)
 }
 
 /**

@@ -10,6 +10,7 @@
 #include "headers/tinymt32.h"
 #include "headers/system.h"
 #include "headers/block.h"
+#include "headers/debug.h"
 
 typedef struct
 {
@@ -67,6 +68,7 @@ int parse_args(args_t *args, int argc, char *argv[])
             break;
         case 'v':
             args->verbose = true;
+            ACTIVATE_DEBUG();
             break;
         case 'f':
             args->output_stream = fopen(optarg, "w");
@@ -154,11 +156,9 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Failed to open the input file %s: %s\n", full_path, strerror(errno));
             goto file_read_error;
         }
-        if (args.verbose)
-        {
-            // This is a simple example of how to use the verbose mode
-            fprintf(stderr, "Successfully opened the file %s\n", full_path);
-        }
+
+        // This is a simple example of how to use the verbose mode
+        DEBUG("Successfully opened the file %s\n", full_path);
 
         parse_file(input_file, args.output_stream);
         // Close this instance file
