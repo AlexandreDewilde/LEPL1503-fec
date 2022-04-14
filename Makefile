@@ -18,14 +18,14 @@ clean:
 	rm -f test_tinymt32
 
 tests: src/debug.c src/tinymt32.c src/system.c tests/tools.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
-	$(CC) $(INCLUDE_HEADERS_DIRECTORY) -o tests_suite -g $^ -lcunit
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o tests_suite -g $^ -lcunit
 	./tests_suite -v
 	
 clean_tests:
 	rm -f tests_suite
 
 speed_tests: src/debug.c src/tinymt32.c src/system.c tests/tools.c tests/speed_tests/speed_tests.c
-	$(CC) $(INCLUDE_HEADERS_DIRECTORY) -o speed_tests $^ -O3
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o speed_tests $^ -O3
 	./speed_tests
 
 clean_speed_tests:
