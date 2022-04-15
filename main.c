@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
         // This is a simple example of how to use the verbose mode
         DEBUG("Successfully opened the file %s\n", full_path);
 
-        parse_file(input_file, args.output_stream);
+        parse_file(directory_entry->d_name, input_file, args.output_stream);
         // Close this instance file
         fclose(input_file);
     }

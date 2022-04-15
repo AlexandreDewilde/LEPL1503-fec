@@ -255,7 +255,7 @@ void free_blocks(block_t *blocks, uint32_t nb_blocks) {
     free(blocks);
 }
 
-void parse_file(FILE *file, FILE *output) {
+void parse_file(char *filename, FILE *file, FILE *output) {
     
     file_info_t file_info;
     get_file_info(file, &file_info);
@@ -273,6 +273,22 @@ void parse_file(FILE *file, FILE *output) {
 
     bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
 
+    uint32_t filename_length = strlen(filename);
+    size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, output);
+    if (written != 1) {
+        printf("Error writing to output the length of filename");
+        exit(-1);
+    }
+    written = fwrite(&(file_info.message_size), sizeof(uint64_t), 1, output);
+    if (written != 1) {
+        printf("Error writing to output the message size\n");
+        exit(-1);
+    }
+    written = fwrite(filename, strlen(filename), 1, output);
+    if (written != 1) {
+        printf("Error writing to output the filename\n");
+        exit(-1);
+    }
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
         prepare_block(&blocks[i], file_info.block_size, file_info.word_size, file_info.redudancy);
         make_block(file, &blocks[i]);
