@@ -1,10 +1,4 @@
-#include <stdbool.h>
-#include <stdarg.h>
-#include <stdio.h> 
-#include <string.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include "debug.h"
+#include "../headers/debug.h"
 
 static int SIGNAL = 0;
 
@@ -31,4 +25,14 @@ void DEBUG_VECTOR(uint8_t *vector, uint32_t vector_size){
 
 void ACTIVATE_DEBUG(){
     SIGNAL = 1;
+}
+
+void deal_error_reading_file(FILE *file) {
+    if (ferror(file)) {
+        printf("This error occured reading the file : %s\n", strerror(errno));
+    }
+    else {
+        printf("File ended, check that file is formated correctly\n");
+    }
+    exit(-1);
 }

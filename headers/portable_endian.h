@@ -27,7 +27,6 @@
 
 #else
 #include <endian.h>
-#include <bits/byteswap.h>
 
 #endif /* __APPLE__ */
 

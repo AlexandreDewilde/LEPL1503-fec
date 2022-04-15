@@ -2,28 +2,50 @@
 
 void get_file_info(FILE *file, file_info_t *file_info) {
 
-    fseek(file, 0L, SEEK_END);
-    file_info->file_size = ftell(file) - 24;
-    rewind(file);
+    size_t readed_chunks;
 
-    int res1 = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
-    if (res1 == -1) exit(-1);
+    int ret = fseek(file, 0L, SEEK_END);
+    if (ret == -1) {
+        printf("Error with fseek : %s\n", strerror(errno));
+        exit(-1);
+    }
+
+    int64_t byte_size = ftell(file);
+    if (byte_size == -1) {
+        printf("Error with ftell : %s\n", strerror(errno));
+    }
+
+    file_info->file_size =  byte_size - 24;
+    rewind(file);
+    
+    readed_chunks = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
+    if (readed_chunks != 1) {
+        deal_error_reading_file(file);
+    }
     file_info->seed = be32toh(file_info->seed);
 
-    int res2 = fread(&(file_info->block_size), sizeof(uint32_t), 1, file);
-    if (res2 == -1) exit(-1);
+    readed_chunks = fread(&(file_info->block_size), sizeof(uint32_t), 1, file);
+    if (readed_chunks != 1) {
+        deal_error_reading_file(file);
+    }
     file_info->block_size = be32toh(file_info->block_size);
 
-    int res3 = fread(&(file_info->word_size), sizeof(uint32_t), 1, file);
-    if (res3 == -1) exit(-1);
+    readed_chunks = fread(&(file_info->word_size), sizeof(uint32_t), 1, file);
+    if (readed_chunks != 1) {
+        deal_error_reading_file(file);
+    }
     file_info->word_size = be32toh(file_info->word_size);
 
-    int res4 = fread(&(file_info->redudancy), sizeof(uint32_t), 1, file);
-    if (res4 == -1) exit(-1);
+    readed_chunks = fread(&(file_info->redudancy), sizeof(uint32_t), 1, file);
+    if (readed_chunks != 1) {
+        deal_error_reading_file(file);
+    }
     file_info->redudancy = be32toh(file_info->redudancy);
 
-    int res5 = fread(&(file_info->message_size), sizeof(uint64_t), 1, file);
-    if (res5 == -1) exit(-1);
+    readed_chunks = fread(&(file_info->message_size), sizeof(uint64_t), 1, file);
+    if (readed_chunks != 1) {
+        deal_error_reading_file(file);
+    }
     file_info->message_size = be64toh(file_info->message_size);
 }
 
@@ -36,31 +58,54 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
 
     // Allocate 2D array to store information
     block->message = malloc(block->block_size * sizeof(uint8_t*));
+    if (block->message == NULL) {
+        printf("Failed to allocate memory for block message\n");
+        exit(-1);
+    }
+
     block->redudant_symbols = malloc(block->redudancy*sizeof(uint8_t*));
+    if (block->redudant_symbols == NULL) {
+        printf("Failed to allocate memory for redudants symbols\n");
+        exit(-1);
+    }
 
     uint8_t *temp = malloc(block->block_size * block->word_size);
+    if (temp == NULL) {
+        printf("Failed to allocate memory for message\n");
+        exit(-1);
+    }
+
     for (uint32_t i = 0; i < block->block_size; i++) {
         block->message[i] = temp + i * block->word_size;
     }
 
     temp = malloc(block->redudancy * block->word_size);
+    if (temp == NULL) {
+        printf("Failed to allocate memory for redudancy symbols\n");
+        exit(-1);
+    }
+
     for (uint32_t i = 0; i < block->redudancy; i++) {
         block->redudant_symbols[i] = temp + i * block->word_size;
     }
 }
 
 void make_block(FILE *file, block_t *block) {
-
+    size_t readed_chunks;
     // Read message from file
     // TODO see if we can replace the loop by adpting agrs of fread
     for (uint8_t i = 0; i < block->block_size; i++) {
-        int res = fread(block->message[i], block->word_size, 1, file);
-        if (res == -1) exit(-1);
+        readed_chunks = fread(block->message[i], block->word_size, 1, file);
+        if (readed_chunks != 1) {
+            deal_error_reading_file(file);
+        }
     }
 
     for (uint8_t i = 0; i < block->redudancy; i++) {
-        int res = fread(block->redudant_symbols[i], block->word_size, 1, file);
-        if (res == -1) exit(-1);
+        readed_chunks = fread(block->redudant_symbols[i], block->word_size, 1, file);
+        if (readed_chunks != 1) {
+            deal_error_reading_file(file);
+        }
     }
 }
 
@@ -79,7 +124,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     uint32_t unknowns = 0;
 
     for (uint32_t i = 0; i < block->block_size;i++) {
-        uint64_t count = 0;
+        uint32_t count = 0;
         for (uint32_t j = 0; j < block->word_size;j++) {
             count += block->message[i][j];
         }
@@ -111,9 +156,6 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
     }
 }
 
-
-
-
 void process_block(block_t *block, uint8_t **coeffs) {
    
     bool *unknowns_indexes = malloc(block->block_size);
@@ -121,14 +163,32 @@ void process_block(block_t *block, uint8_t **coeffs) {
 
     if (unknowns) {
         uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
+        if (A == NULL) {
+            printf("Error while allocating memory processing block\n");
+            exit(-1);
+        }
         uint8_t **B = malloc(unknowns * sizeof(uint8_t *));
+        if (B == NULL) {
+            printf("Error while allocating memory processing block\n");
+            exit(-1);
+        }
 
         uint8_t *temp_alloc = malloc(unknowns * block->word_size);
+        if (temp_alloc == NULL) {
+            printf("Error while allocating memory processing block\n");
+            exit(-1);
+        }
+
         for (uint32_t i = 0; i < unknowns; i++) {
             A[i] = temp_alloc + i * block->word_size;
         }
         
         temp_alloc = malloc(unknowns * block->word_size);
+        if (temp_alloc == NULL) {
+            printf("Error while allocating memory processing block\n");
+            exit(-1);
+        }
+
         for (uint32_t i = 0; i < unknowns; i++) {
             B[i] = temp_alloc + i * block->word_size;
             memcpy(B[i], block->redudant_symbols[i], block->word_size);
@@ -155,49 +215,28 @@ void process_block(block_t *block, uint8_t **coeffs) {
 
 void write_block(block_t *block, FILE *output) {
     for (uint32_t j = 0; j < block->block_size; j++) {
-        fwrite(block->message[j], block->word_size, 1, output);
+        size_t written = fwrite(block->message[j], block->word_size, 1, output);
+        if (written != 1) {
+            printf("Error writing to output\n");
+            exit(-1);
+        }
     }
 }
 
 
 void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding) {
     for (uint32_t j = 0; j < remaining - 1; j++) {
-        fwrite(block->message[j], block->word_size, 1, output);
-    }
-    fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
-}
-
-message_t *blocks_to_message_t(block_t *blocks, uint32_t nb_blocks, bool uncomplete_block, uint32_t block_size, uint32_t word_size, uint32_t remaining, uint32_t padding) {
-    message_t *message = malloc(sizeof(message_t));
-
-    message->length = (nb_blocks - uncomplete_block) * block_size * word_size;
-    if (uncomplete_block) {
-        message->length += (remaining - 1) * word_size + word_size - padding;
-    }
-
-    message->message = malloc(message->length);
-
-    uint64_t idx = 0;
-
-    for (uint32_t i = 0; i < nb_blocks - uncomplete_block; i++) {
-        for (uint32_t j = 0; j < block_size; j++) {
-            for (uint32_t k = 0; k < word_size; k++) {
-                message->message[idx++] = blocks[i].message[j][k];
-            }
+        size_t written = fwrite(block->message[j], block->word_size, 1, output);
+        if (written != 1) {
+            printf("Error writing to output\n");
+            exit(-1);
         }
     }
-
-    if (uncomplete_block) {
-        for (uint32_t j = 0; j < remaining - 1; j++) {
-            for (uint32_t k = 0; k < blocks[nb_blocks - 1].word_size; k++) {
-                message->message[idx++] = blocks[nb_blocks-1].message[j][k];
-            }
-        }
-        for (uint32_t j = 0; j < blocks[nb_blocks - 1].word_size - padding; j++) {
-            message->message[idx++] = blocks[nb_blocks-1].message[remaining-1][j];
-        }
+    size_t written = fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
+    if (written != 1) {
+        printf("Error writing to output\n");
+        exit(-1);
     }
-    return message;
 }
 
 void parse_file(FILE *file, FILE *output) {
@@ -211,12 +250,12 @@ void parse_file(FILE *file, FILE *output) {
     uint64_t nb_blocks = ceil(file_info.file_size / (double) step);
 
     block_t *blocks = malloc(nb_blocks*sizeof(block_t));
-    bool uncomplete_block = false;
-
-    if (file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size) {
-        uncomplete_block = true;
+    if (blocks == NULL) {
+        printf("Error allocating memory for block\n");
+        exit(-1);
     }
- 
+
+    bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
 
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
         prepare_block(&blocks[i], file_info.block_size, file_info.word_size, file_info.redudancy);
@@ -225,6 +264,7 @@ void parse_file(FILE *file, FILE *output) {
         write_block(&blocks[i], output);
     }
 
+    // Todo deal with ftell error
     uint32_t remaining = ( (file_info.file_size + 24 - ftell(file)) / file_info.word_size) - file_info.redudancy;
 
     uint32_t padding = (file_info.block_size * file_info.word_size * (nb_blocks - 1)) + remaining * file_info.word_size - file_info.message_size;
@@ -235,7 +275,6 @@ void parse_file(FILE *file, FILE *output) {
         process_block(&blocks[nb_blocks-1], coeffs);
         write_last_block(&blocks[nb_blocks-1], output, remaining, padding);
     }
-
 
     free_blocks(blocks, nb_blocks);
     free(coeffs[0]);
