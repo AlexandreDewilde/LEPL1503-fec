@@ -84,14 +84,14 @@ void test_gf_256_mul_vector_simple_test(){
 
     uint8_t result[] = {0, 0, 0, 0};
     uint8_t *r_symbole= gf_256_mul_vector(symbol,coef,symbol_size);
-    for (int i = 0; i < symbol_size; i++){
+    for (uint32_t i = 0; i < symbol_size; i++){
         CU_ASSERT_EQUAL(r_symbole[i],result[i]);
     }  
 
     coef=3;
     uint8_t result1[] = {3, 6, 5, 12};
     uint8_t *r_symbole1= gf_256_mul_vector(symbol,coef,symbol_size);
-    for (int i = 0; i < symbol_size; i++){
+    for (uint32_t i = 0; i < symbol_size; i++){
         CU_ASSERT_EQUAL(r_symbole1[i],result1[i]);
     }
     uint8_t coefs=25;
@@ -99,7 +99,7 @@ void test_gf_256_mul_vector_simple_test(){
     uint32_t symbol_sizes=9; 
     uint8_t *r_symboles= gf_256_mul_vector(symboles,coefs,symbol_sizes);
     uint8_t result2[] ={187,92,70,218,178,76,187,109,31};
-    for (int i = 0; i < symbol_sizes; i++){
+    for (uint32_t i = 0; i < symbol_sizes; i++){
         CU_ASSERT_EQUAL(r_symboles[i],result2[i]);
     }
 }
@@ -170,7 +170,7 @@ void test_gf_256_inv_vector() {
     uint32_t symbol_sizes=9;
     uint8_t *r_symboles= gf_256_inv_vector(symboles,coefs,symbol_sizes);
     uint8_t result2[] ={166,1,123,8,253,132,166,4,139};
-    for (int i = 0; i < symbol_sizes; i++){
+    for (uint32_t i = 0; i < symbol_sizes; i++){
         CU_ASSERT_EQUAL(r_symboles[i],result2[i]);
     } 
 }

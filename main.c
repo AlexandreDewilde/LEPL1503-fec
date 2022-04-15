@@ -101,6 +101,7 @@ int parse_args(args_t *args, int argc, char *argv[])
     // The following line is not very secure... Ask Prof. Legay and/or wait for LINGI2144 for more information :-)
     strcpy(args->input_dir_path, argv[optind++]);
 
+    
     return 0;
 }
 

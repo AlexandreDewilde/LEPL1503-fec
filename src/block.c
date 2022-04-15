@@ -60,7 +60,7 @@ void make_block(FILE *file, block_t *block) {
 
     for (uint8_t i = 0; i < block->redudancy; i++) {
         int res = fread(block->redudant_symbols[i], block->word_size, 1, file);
-        if (res == -1);
+        if (res == -1) exit(-1);
     }
 }
 

@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Werror --std=gnu99
+CFLAGS=-Wall -Werror -Wextra  --std=gnu99
 LIBS=-lcunit -lpthread -lm
 INCLUDE_HEADERS_DIRECTORY=-Iheaders
 
@@ -17,8 +17,8 @@ clean:
 	rm -f fec
 	rm -f test_tinymt32
 
-tests: src/debug.c src/tinymt32.c src/system.c tests/tools.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
-	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o tests_suite -g $^ -lcunit
+tests: src/debug.c src/tinymt32.c src/system.c src/block.c tests/test_block.c  tests/tools.c tests/test_tinymt32.c tests/test_system.c tests/tests.c
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) $(LIBS) -o tests_suite -g $^ -lcunit
 	./tests_suite -v
 	
 clean_tests:
