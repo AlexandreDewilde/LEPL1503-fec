@@ -4,6 +4,7 @@ void get_file_info(FILE *file, file_info_t *file_info) {
 
     size_t readed_chunks;
 
+    // Go to the end of the file to calculate the file size
     int ret = fseek(file, 0L, SEEK_END);
     if (ret == -1) {
         printf("Error with fseek : %s\n", strerror(errno));
@@ -16,8 +17,11 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     }
 
     file_info->file_size =  byte_size - 24;
+    // Go back to the start of the file
     rewind(file);
     
+    // Reads file header with all the information
+
     readed_chunks = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
     if (readed_chunks != 1) {
         deal_error_reading_file(file);
@@ -56,13 +60,14 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     block->word_size = word_size;
     block->redudancy = redudancy;
 
-    // Allocate 2D array to store information
+    // Allocate 2D array to store the message stored in this block
     block->message = malloc(block->block_size * sizeof(uint8_t*));
     if (block->message == NULL) {
         printf("Failed to allocate memory for block message\n");
         exit(-1);
     }
 
+    // Allocate 2D array to store the redudant symbols of the block
     block->redudant_symbols = malloc(block->redudancy*sizeof(uint8_t*));
     if (block->redudant_symbols == NULL) {
         printf("Failed to allocate memory for redudants symbols\n");
@@ -90,10 +95,16 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     }
 }
 
+void free_block(block_t *block) {
+    free(block->message[0]);
+    free(block->message);
+    free(block->redudant_symbols[0]);
+    free(block->redudant_symbols);
+}
+
 void make_block(FILE *file, block_t *block) {
     size_t readed_chunks;
-    // Read message from file
-    // TODO see if we can replace the loop by adpting agrs of fread
+    // Read message from file and stored it in the block structure
     for (uint8_t i = 0; i < block->block_size; i++) {
         readed_chunks = fread(block->message[i], block->word_size, 1, file);
         if (readed_chunks != 1) {
@@ -101,6 +112,7 @@ void make_block(FILE *file, block_t *block) {
         }
     }
 
+    // Read Redudant symbols and stored it in the block structure
     for (uint8_t i = 0; i < block->redudancy; i++) {
         readed_chunks = fread(block->redudant_symbols[i], block->word_size, 1, file);
         if (readed_chunks != 1) {
@@ -108,17 +120,6 @@ void make_block(FILE *file, block_t *block) {
         }
     }
 }
-
-void free_blocks(block_t *blocks, uint32_t nb_blocks) {
-    for (uint32_t i = 0; i < nb_blocks; i++) {
-        if (blocks[i].block_size) free(blocks[i].message[0]);
-        free(blocks[i].message);
-        if (blocks[i].redudancy) free(blocks[i].redudant_symbols[0]);
-        free(blocks[i].redudant_symbols);
-    }
-    free(blocks);
-}
-
 
 uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     uint32_t unknowns = 0;
@@ -128,6 +129,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
         for (uint32_t j = 0; j < block->word_size;j++) {
             count += block->message[i][j];
         }
+        // If count == 0 then all bytes equal 0 then we assume it's a lost word
         if (!count) {
             unknown_indexes[i] = true;
             unknowns++;
@@ -148,6 +150,7 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
                 A[i][temp++] = coeffs[i][j];
             }
             else {
+                // In case the word is not lost we have to substract to solve the system without it 
                 uint8_t *b_sub_line = gf_256_mul_vector(block->message[j], coeffs[i][j], block->word_size);
                 inplace_gf_256_full_add_vector(B[i], b_sub_line, block->word_size);
                 free(b_sub_line);               
@@ -159,8 +162,14 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
 void process_block(block_t *block, uint8_t **coeffs) {
    
     bool *unknowns_indexes = malloc(block->block_size);
+    if (unknowns_indexes == NULL) {
+        printf("Failed to allocated unknown indexes vector\n");
+        exit(-1);
+    }
+
     uint32_t unknowns = find_lost_words(block, unknowns_indexes);
 
+    // If there is no unknown, those ops are useless
     if (unknowns) {
         uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
         if (A == NULL) {
@@ -239,6 +248,13 @@ void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t
     }
 }
 
+void free_blocks(block_t *blocks, uint32_t nb_blocks) {
+    for (uint32_t i = 0; i < nb_blocks; i++) {
+        free_block(&blocks[i]);
+    }
+    free(blocks);
+}
+
 void parse_file(FILE *file, FILE *output) {
     
     file_info_t file_info;
@@ -264,8 +280,12 @@ void parse_file(FILE *file, FILE *output) {
         write_block(&blocks[i], output);
     }
 
-    // Todo deal with ftell error
-    uint32_t remaining = ( (file_info.file_size + 24 - ftell(file)) / file_info.word_size) - file_info.redudancy;
+    int64_t current_pos = ftell(file);
+    if (current_pos == -1) {
+        printf("Error with ftell : %s\n", strerror(errno));
+        exit(-1);
+    }
+    uint32_t remaining = ( (file_info.file_size + 24 - current_pos) / file_info.word_size) - file_info.redudancy;
 
     uint32_t padding = (file_info.block_size * file_info.word_size * (nb_blocks - 1)) + remaining * file_info.word_size - file_info.message_size;
     

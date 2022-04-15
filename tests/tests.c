@@ -5,23 +5,10 @@
 #include <CUnit/Basic.h>
 
 
-/**
-*
-*
-* @param
-* @return: 
-*/
-
 void generate_tinymt32_suite(CU_pSuite suite) {
     CU_add_test(suite, "correct_coeffs", test_tinymt32_gen_42);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void generate_system_suite(CU_pSuite suite) {
     CU_add_test(suite, "Correct vector addition", test_gf_256_full_add_vector);
@@ -55,9 +42,8 @@ int main(int argc, char *argv[])
     CU_pSuite system_suite = CU_add_suite("system", system_setup, system_teardown);
     generate_system_suite(system_suite);
 
-    CU_pSuite block_suite = CU_add_suite("block", system_setup, system_teardown);
-    generate_block_suite(block_suite);
-
+    // CU_pSuite block_suite = CU_add_suite("block", system_setup, system_teardown);
+    // generate_block_suite(block_suite);
 
     CU_basic_run_tests();
     CU_basic_show_failures(CU_get_failure_list());

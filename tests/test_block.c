@@ -49,36 +49,22 @@ void test_get_file_info(){
 
 
 void test_find_lost_words(){
-    
+    FILE *file;
+    file = fopen("Binary_doc_test/small.bin","rb");
 
-
-    /*block1->block_size = 3;
+    block_t *block1 = malloc(sizeof(block_t));
+    block1->block_size = 3;
     block1->word_size = 3;
-    block1->redudancy = 4;
     block1->message = generate_zero_matrix(block1->block_size, block1->word_size);
-    block1->redudant_symbols=generate_zero_matrix(block1->redudancy, block1->redudancy);
-    bool *unknown_indexes;*/
-    
 
-    // FILE *file;
-    // block_t *block1 = malloc(sizeof(block_t));
-    // bool *unknown_indexes[block1->block_size];
-    // file = fopen("Binary_doc_test/small.bin","rb");
-    // make_block(file,block1);
-    // uint32_t res = 3;
-    // uint32_t nbr = find_lost_words(block1,unknown_indexes);
-        
-    // CU_ASSERT_EQUAL(nbr, res);
-    // // unknown_indexes = [true,false,true]
-    // free(block1);
-   
+    bool unknown_indexes[block1->block_size];
     
-   
+    CU_ASSERT_EQUAL(find_lost_words(block1, unknown_indexes), 3);
 
-
-
-    
-    
+    free(block1->message[0]);
+    free(block1->message);
+    fclose(file);
+    free(block1);
 }
 
 

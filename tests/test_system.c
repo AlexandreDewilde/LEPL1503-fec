@@ -33,7 +33,7 @@ void test_gf_256_full_add_vector_simple_test() {
 
     free(res);
     
-    DEBUG("The function est_gf_256_full_add_vector_simple_test was executed"); //This is just a test of debug (verbose)
+    DEBUG("The function test_gf_256_full_add_vector_simple_test was executed\n"); //This is just a test of debug (verbose)
 }
 
 /**
@@ -233,17 +233,21 @@ void test_gf_256_gaussian_elimination_file() {
     parse_matrix_file("tests/samples/systems.txt", &NB, &n, &b_size, &A_matrices, &B_matrices, &solutions);
 
     for (uint32_t k = 0; k < NB; k++) {
-        //printf("%d, %d\n", n[k], b_size[k]);
 
         gf_256_gaussian_elimination(A_matrices[k], B_matrices[k], b_size[k], n[k]);
         CU_ASSERT_EQUAL(0, compare_2Darray(B_matrices[k], solutions[k], n[k], b_size[k]));
-        for (uint32_t i = 0; i < n[k]; i++) {
-            for (uint32_t j = 0; j < b_size[k]; j++) {
-                //printf("%d ", B_matrices[k][i][j]);
-            }
-            //printf("\n");
-        }
+        free(A_matrices[k][0]);
+        free(A_matrices[k]);
+        free(B_matrices[k][0]);
+        free(B_matrices[k]);
+        free(solutions[k][0]);
+        free(solutions[k]);
     }
+    free(n);
+    free(b_size);
+    free(A_matrices);
+    free(B_matrices);
+    free(solutions);
 }
 
 /**
