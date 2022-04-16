@@ -273,13 +273,14 @@ void parse_file(char *filename, FILE *file, FILE *output) {
 
     bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
 
-    uint32_t filename_length = strlen(filename);
+    uint32_t filename_length = htobe32(strlen(filename));
     size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, output);
     if (written != 1) {
         printf("Error writing to output the length of filename");
         exit(-1);
     }
-    written = fwrite(&(file_info.message_size), sizeof(uint64_t), 1, output);
+    uint64_t message_size = htobe64(file_info.message_size);
+    written = fwrite(&message_size, sizeof(uint64_t), 1, output);
     if (written != 1) {
         printf("Error writing to output the message size\n");
         exit(-1);
