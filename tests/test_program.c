@@ -68,7 +68,6 @@ void test_multiple_file() {
 }
 
 void test_program() {
-    // Solve a bug to execute 2 time program 
-    // test_one_file(); /
+    test_one_file();
     test_multiple_file();
 }

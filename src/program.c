@@ -43,6 +43,7 @@ int parse_args(args_t *args, int argc, char *argv[])
     args->verbose = false;
     args->output_stream = stdout;
     int opt;
+    optind = 1;
     while ((opt = getopt(argc, argv, "n:vf:")) != -1)
     {
         switch (opt)
