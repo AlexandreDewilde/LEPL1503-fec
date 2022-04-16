@@ -68,6 +68,6 @@ void test_multiple_file() {
 }
 
 void test_program() {
-    test_one_file();
+    // test_one_file(); create another tests beceause if reset optind to 1 cause memory error say valgrind
     test_multiple_file();
 }
