@@ -20,7 +20,7 @@ void test_one_file() {
     program(4, argv);
     
     FILE *file = fopen("test.txt", "rb");
-    FILE *file2 = fopen("tests/samples/output_africa.txt", "rb");
+    FILE *file2 = fopen("tests/samples/output_africa.bin", "rb");
     char *filename = malloc(25);
     char *filename2 = malloc(25);
     char* str = read_file_output(file, filename);
@@ -31,8 +31,44 @@ void test_one_file() {
     free(str);
     free(filename);
     fclose(file);
+    fclose(file2);
+}
+
+void test_multiple_file() {
+    char *argv[] = {"./fec", "Binary_doc_test", "-f", "test.txt"};
+    program(4, argv);
+    char *output_folder = "tests/samples/";
+
+    FILE *file = fopen("test.txt", "rb");
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+    char *filename = malloc(25);
+    while(ftell(file) < size) {
+        char *str = read_file_output(file, filename);
+
+        uint32_t length_path = strlen(output_folder) + 7 + strlen(filename) + 1;
+        char *result_file = malloc(length_path);
+        sprintf(result_file, "%soutput_%s", output_folder, filename);
+        result_file[length_path] = '\0';
+        FILE *file2 = fopen(result_file, "rb");
+
+        char *filename2 = malloc(strlen(filename) + 1);
+        char *str2 = read_file_output(file2, filename2);
+
+        CU_ASSERT_EQUAL(0, strcmp(str, str2));
+        
+        free(str2);
+        free(str);
+        free(filename2);
+        fclose(file2);
+    }
+    free(filename);
+    fclose(file);
 }
 
 void test_program() {
-    test_one_file();
+    // Solve a bug to execute 2 time program 
+    // test_one_file(); /
+    test_multiple_file();
 }
