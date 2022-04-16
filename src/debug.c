@@ -2,6 +2,16 @@
 
 static int SIGNAL = 0;
 
+void deal_error_reading_file(FILE *file) {
+    if (ferror(file)) {
+        DEBUG("This error occured reading the file : %s\n", strerror(errno));
+    }
+    else {
+        DEBUG("File ended, check that file is formated correctly\n");
+    }
+    exit(EXIT_FAILURE);
+}
+
 void DEBUG(const char *restrict format, ...){
     if (SIGNAL){
         va_list args;
@@ -25,14 +35,4 @@ void DEBUG_VECTOR(uint8_t *vector, uint32_t vector_size){
 
 void ACTIVATE_DEBUG(){
     SIGNAL = 1;
-}
-
-void deal_error_reading_file(FILE *file) {
-    if (ferror(file)) {
-        printf("This error occured reading the file : %s\n", strerror(errno));
-    }
-    else {
-        printf("File ended, check that file is formated correctly\n");
-    }
-    exit(-1);
 }

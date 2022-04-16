@@ -7,13 +7,14 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     // Go to the end of the file to calculate the file size
     int ret = fseek(file, 0L, SEEK_END);
     if (ret == -1) {
-        printf("Error with fseek : %s\n", strerror(errno));
-        exit(-1);
+        DEBUG("Error with fseek : %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
     }
 
     int64_t byte_size = ftell(file);
     if (byte_size == -1) {
-        printf("Error with ftell : %s\n", strerror(errno));
+        DEBUG("Error with ftell : %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
     }
 
     file_info->file_size =  byte_size - 24;
@@ -63,21 +64,21 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     // Allocate 2D array to store the message stored in this block
     block->message = malloc(block->block_size * sizeof(uint8_t*));
     if (block->message == NULL) {
-        printf("Failed to allocate memory for block message\n");
-        exit(-1);
+        DEBUG("Failed to allocate memory for block message\n");
+        exit(EXIT_FAILURE);
     }
 
     // Allocate 2D array to store the redudant symbols of the block
     block->redudant_symbols = malloc(block->redudancy*sizeof(uint8_t*));
     if (block->redudant_symbols == NULL) {
-        printf("Failed to allocate memory for redudants symbols\n");
-        exit(-1);
+        DEBUG("Failed to allocate memory for redudants symbols\n");
+        exit(EXIT_FAILURE);
     }
 
     uint8_t *temp = malloc(block->block_size * block->word_size);
     if (temp == NULL) {
-        printf("Failed to allocate memory for message\n");
-        exit(-1);
+        DEBUG("Failed to allocate memory for message\n");
+        exit(EXIT_FAILURE);
     }
 
     for (uint32_t i = 0; i < block->block_size; i++) {
@@ -86,8 +87,8 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
 
     temp = malloc(block->redudancy * block->word_size);
     if (temp == NULL) {
-        printf("Failed to allocate memory for redudancy symbols\n");
-        exit(-1);
+        DEBUG("Failed to allocate memory for redudancy symbols\n");
+        exit(EXIT_FAILURE);
     }
 
     for (uint32_t i = 0; i < block->redudancy; i++) {
@@ -163,8 +164,8 @@ void process_block(block_t *block, uint8_t **coeffs) {
    
     bool *unknowns_indexes = malloc(block->block_size);
     if (unknowns_indexes == NULL) {
-        printf("Failed to allocated unknown indexes vector\n");
-        exit(-1);
+        DEBUG("Failed to allocated unknown indexes vector\n");
+        exit(EXIT_FAILURE);
     }
 
     uint32_t unknowns = find_lost_words(block, unknowns_indexes);
@@ -173,19 +174,19 @@ void process_block(block_t *block, uint8_t **coeffs) {
     if (unknowns) {
         uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
         if (A == NULL) {
-            printf("Error while allocating memory processing block\n");
-            exit(-1);
+            DEBUG("Error while allocating memory processing block\n");
+            exit(EXIT_FAILURE);
         }
         uint8_t **B = malloc(unknowns * sizeof(uint8_t *));
         if (B == NULL) {
-            printf("Error while allocating memory processing block\n");
-            exit(-1);
+            DEBUG("Error while allocating memory processing block\n");
+            exit(EXIT_FAILURE);
         }
 
         uint8_t *temp_alloc = malloc(unknowns * block->word_size);
         if (temp_alloc == NULL) {
-            printf("Error while allocating memory processing block\n");
-            exit(-1);
+            DEBUG("Error while allocating memory processing block\n");
+            exit(EXIT_FAILURE);
         }
 
         for (uint32_t i = 0; i < unknowns; i++) {
@@ -194,8 +195,8 @@ void process_block(block_t *block, uint8_t **coeffs) {
         
         temp_alloc = malloc(unknowns * block->word_size);
         if (temp_alloc == NULL) {
-            printf("Error while allocating memory processing block\n");
-            exit(-1);
+            DEBUG("Error while allocating memory processing block\n");
+            exit(EXIT_FAILURE);
         }
 
         for (uint32_t i = 0; i < unknowns; i++) {
@@ -226,8 +227,8 @@ void write_block(block_t *block, FILE *output) {
     for (uint32_t j = 0; j < block->block_size; j++) {
         size_t written = fwrite(block->message[j], block->word_size, 1, output);
         if (written != 1) {
-            printf("Error writing to output\n");
-            exit(-1);
+            DEBUG("Error writing to output\n");
+            exit(EXIT_FAILURE);
         }
     }
 }
@@ -237,14 +238,14 @@ void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t
     for (uint32_t j = 0; j < remaining - 1; j++) {
         size_t written = fwrite(block->message[j], block->word_size, 1, output);
         if (written != 1) {
-            printf("Error writing to output\n");
-            exit(-1);
+            DEBUG("Error writing to output\n");
+            exit(EXIT_FAILURE);
         }
     }
     size_t written = fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
     if (written != 1) {
-        printf("Error writing to output\n");
-        exit(-1);
+        DEBUG("Error writing to output\n");
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -267,8 +268,8 @@ void parse_file(char *filename, FILE *file, FILE *output) {
 
     block_t *blocks = malloc(nb_blocks*sizeof(block_t));
     if (blocks == NULL) {
-        printf("Error allocating memory for block\n");
-        exit(-1);
+        DEBUG("Error allocating memory for block\n");
+        exit(EXIT_FAILURE);
     }
 
     bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
@@ -276,19 +277,19 @@ void parse_file(char *filename, FILE *file, FILE *output) {
     uint32_t filename_length = htobe32(strlen(filename));
     size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, output);
     if (written != 1) {
-        printf("Error writing to output the length of filename");
-        exit(-1);
+        DEBUG("Error writing to output the length of filename");
+        exit(EXIT_FAILURE);
     }
     uint64_t message_size = htobe64(file_info.message_size);
     written = fwrite(&message_size, sizeof(uint64_t), 1, output);
     if (written != 1) {
-        printf("Error writing to output the message size\n");
-        exit(-1);
+        DEBUG("Error writing to output the message size\n");
+        exit(EXIT_FAILURE);
     }
     written = fwrite(filename, strlen(filename), 1, output);
     if (written != 1) {
         printf("Error writing to output the filename\n");
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
         prepare_block(&blocks[i], file_info.block_size, file_info.word_size, file_info.redudancy);
@@ -299,8 +300,8 @@ void parse_file(char *filename, FILE *file, FILE *output) {
 
     int64_t current_pos = ftell(file);
     if (current_pos == -1) {
-        printf("Error with ftell : %s\n", strerror(errno));
-        exit(-1);
+        DEBUG("Error with ftell : %s\n", strerror(errno));
+        exit(EXIT_FAILURE);
     }
     uint32_t remaining = ( (file_info.file_size + 24 - current_pos) / file_info.word_size) - file_info.redudancy;
 
