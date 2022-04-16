@@ -1,8 +1,9 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
-#include "../headers/gf256_tables.h"
-#include "../headers/tinymt32.h"
+#include "gf256_tables.h"
+#include "tinymt32.h"
+#include "debug.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

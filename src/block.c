@@ -52,6 +52,8 @@ void get_file_info(FILE *file, file_info_t *file_info) {
         deal_error_reading_file(file);
     }
     file_info->message_size = be64toh(file_info->message_size);
+
+    DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
 }
 
 
@@ -139,6 +141,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
             unknown_indexes[i] = false;
         }
     }
+    DEBUG_VECTOR_BOOLEAN(unknown_indexes, block->block_size);
     return unknowns;
 }
 
@@ -158,6 +161,9 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
             } 
         }
     }
+
+    verbose_linear_system(A, B, unknown, unknown);
+    DEBUG("Size :%d\n", unknown);
 }
 
 void process_block(block_t *block, uint8_t **coeffs) {
@@ -262,6 +268,7 @@ void parse_file(char *filename, FILE *file, FILE *output) {
     get_file_info(file, &file_info);
     
     uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.word_size);
+    verbose_matrix(coeffs, file_info.word_size, file_info.block_size);
     
     uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
     uint64_t nb_blocks = ceil(file_info.file_size / (double) step);
