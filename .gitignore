@@ -2,4 +2,4 @@
 fec
 tests_suite
 speed_tests
-samples/
+./samples/
