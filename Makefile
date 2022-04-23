@@ -2,7 +2,8 @@ CC=gcc
 CFLAGS=-Wall -Werror -Wextra  --std=gnu99
 LIBS=-lcunit -lpthread -lm
 INCLUDE_HEADERS_DIRECTORY=-Iheaders
-PROGRAM_FILES=src/program.c src/debug.c src/tinymt32.c src/system.c src/block.c
+PROGRAM_FILES=src/program.c src/debug.c src/tinymt32.c src/system.c src/block.c 
+THREAD_PROGRAM_FILES=src/program.c src/debug.c src/tinymt32.c src/system.c src/block.c src/shared_buffer.c src/producer.c src/consumer.c src/prod_cons_program.c
 TEST_FILES=tests/test_block.c  tests/test_program.c tests/test_tinymt32.c tests/test_system.c
 
 fec: $(PROGRAM_FILES) main.c  # add your other object files needed to compile your program here. !! 
@@ -20,7 +21,11 @@ clean:
 	rm -f test_tinymt32
 
 tests: $(PROGRAM_FILES) $(TEST_FILES) tests/tools.c tests/tests.c
-	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) $(LIBS) -o tests_suite -g $^ -lcunit
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS)  -o tests_suite -g $^ -lcunit $(LIBS)
+	./tests_suite -v
+
+thread_tests:  $(THREAD_PROGRAM_FILES) $(TEST_FILES) tests/tools.c tests/tests.c
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS)  -o tests_suite -g $^ -lcunit $(LIBS)
 	./tests_suite -v
 	
 clean_tests:

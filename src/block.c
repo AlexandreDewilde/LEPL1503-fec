@@ -306,6 +306,7 @@ void parse_file(char *filename, FILE *file, FILE *output) {
     }
 
     int64_t current_pos = ftell(file);
+    
     if (current_pos == -1) {
         DEBUG("Error with ftell : %s\n", strerror(errno));
         exit(EXIT_FAILURE);

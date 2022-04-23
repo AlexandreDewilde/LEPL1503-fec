@@ -153,7 +153,10 @@ void fill_matrix_random(uint8_t **matrix, uint32_t n, uint32_t m) {
 */
 
 void getline_naive(char* line, size_t *len, FILE *file) {
-    fgets(line, 256, file);
+    char *ret_value = fgets(line, 256, file);
+    if (ret_value == NULL){
+        return;
+    }
     uint8_t i = 0;
     while (line[i] != '\n' && line[i] != '\0') {
         i++;
