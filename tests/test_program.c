@@ -17,7 +17,7 @@ char* read_file_output(FILE* file, char* filename) {
 
 void test_one_file() {
     char *argv[] = {"./fec", "tests/samples/sample_one_file", "-f", "test.txt"};
-    program(4, argv);
+    threads_program(4, argv);
     
     FILE *file = fopen("test.txt", "rb");
     FILE *file2 = fopen("tests/samples/output_africa.bin", "rb");

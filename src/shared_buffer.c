@@ -11,8 +11,8 @@ buffer_info **create_shared_buffer(int size){
 
 }
 
-void produce_in_shared_buffer(buffer_info *buffer_index, buffer_info *data){
-    buffer_index = &(*data);
+void produce_in_shared_buffer(buffer_info **buffer,int prod_mutex, buffer_info *data){
+    buffer[prod_mutex] = data;
     
                                            
 }

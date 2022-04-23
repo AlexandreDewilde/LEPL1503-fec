@@ -11,7 +11,7 @@ sem_t full;
 
 
 buffer_info **create_shared_buffer(int size);
-void produce_in_shared_buffer(buffer_info *buffer_index, buffer_info *data);
+void produce_in_shared_buffer(buffer_info **buffer, int index, buffer_info *data);
 void consume_in_shared_buffer(buffer_info **buffer, FILE *output);
 
 #endif /*SHARED_BUFFER_H*/

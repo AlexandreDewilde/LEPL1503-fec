@@ -67,7 +67,7 @@ void producer(char *filename, FILE *file, buffer_info **buffer, int nb_of_file){
     sem_wait(&empty); // attente d'une place libre
     pthread_mutex_lock(&mutex);
      // section critique
-    produce_in_shared_buffer(buffer[prod_index], info_cons);
+    produce_in_shared_buffer(buffer, prod_index, info_cons);
 
     //Increment the index of the buffer
     if (prod_index < nb_of_file){
