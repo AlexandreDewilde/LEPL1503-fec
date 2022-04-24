@@ -1,6 +1,7 @@
 #include "../headers/shared_buffer.h"
 
 
+
 buffer_info **create_shared_buffer(int size){
     buffer_info **buffer = (buffer_info **) malloc(size * sizeof(buffer_info *));
     pthread_mutex_init(&mutex, NULL);
@@ -13,6 +14,7 @@ buffer_info **create_shared_buffer(int size){
 
 void produce_in_shared_buffer(buffer_info **buffer,int prod_mutex, buffer_info *data){
     buffer[prod_mutex] = data;
+    
     
                                            
 }

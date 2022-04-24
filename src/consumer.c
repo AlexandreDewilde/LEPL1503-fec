@@ -2,51 +2,13 @@
 #include "../headers/shared_buffer.h"
 #include "../headers/prod_cons_program.h"
 #include "../headers/producer.h"
+#include "../headers/block.h"
 
-void free_block(block_t *block) {
-    free(block->message[0]);
-    free(block->message);
-    free(block->redudant_symbols[0]);
-    free(block->redudant_symbols);
-}
-
-void write_block(block_t *block, FILE *output) {
-    for (uint32_t j = 0; j < block->block_size; j++) {
-        size_t written = fwrite(block->message[j], block->word_size, 1, output);
-        if (written != 1) {
-            DEBUG("Error writing to output\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-}
-
-
-void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding) {
-    for (uint32_t j = 0; j < remaining - 1; j++) {
-        size_t written = fwrite(block->message[j], block->word_size, 1, output);
-        if (written != 1) {
-            DEBUG("Error writing to output\n");
-            exit(EXIT_FAILURE);
-        }
-    }
-    size_t written = fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
-    if (written != 1) {
-        DEBUG("Error writing to output\n");
-        exit(EXIT_FAILURE);
-    }
-}
-
-void free_blocks(block_t *blocks, uint32_t nb_blocks) {
-    for (uint32_t i = 0; i < nb_blocks; i++) {
-        free_block(&blocks[i]);
-    }
-    free(blocks);
-}
 
 void consumer(buffer_info **buffer, FILE *output){
     sem_wait(&full); // attente d'une place remplie
     pthread_mutex_lock(&mutex);
-
+    
     buffer_info *current_index = buffer[cons_index];
     
     size_t written = fwrite(&(current_index->filename_length), sizeof(uint32_t), 1, output);
@@ -79,7 +41,7 @@ void consumer(buffer_info **buffer, FILE *output){
 
     //Increment the index of the buffer
     if (cons_index < current_index->nb_of_file){
-        cons_index += 1;
+        cons_index = cons_index + 1;
     }else{
         cons_index = 0;
     }

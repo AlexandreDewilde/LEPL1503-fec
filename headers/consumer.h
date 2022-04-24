@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "block.h"
 #include "buffer_info.h"
+#include "prod_cons_program.h"
 
 
 void consumer(buffer_info **buffer, FILE *output);

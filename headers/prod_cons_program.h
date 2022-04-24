@@ -13,13 +13,14 @@
 #include "debug.h"
 #include "block.h"
 #include "producer.h"
+#include "consumer.h"
 #include "shared_buffer.h"
 
 
 
 //initialise the global prod_index & cons_index
-int prod_index = 0;
-int cons_index = 0;
+int prod_index;
+int cons_index;
 
 
 //Initialising the mutex which will rptect the buffer

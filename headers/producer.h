@@ -13,6 +13,7 @@
 #include "debug.h"
 #include "block.h"
 #include "shared_buffer.h"
+#include "prod_cons_program.h"
 
 
 void producer(char *filename, FILE *file, buffer_info **buffer, int nb_of_file);

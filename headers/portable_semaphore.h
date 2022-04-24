@@ -3,6 +3,7 @@
 
 #include <semaphore.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 static inline sem_t *
 my_sem_init_with_name(char *name, uint32_t value)
@@ -12,7 +13,7 @@ my_sem_init_with_name(char *name, uint32_t value)
     sem_t *s;
     return sem_open(name, O_CREAT, 0644, value);
 #else
-    sem_t *sem = malloc(sizeof(sem_t));
+    sem_t *sem = (sem_t*) malloc(sizeof(sem_t));
     if (!sem)
     {
         return NULL;
