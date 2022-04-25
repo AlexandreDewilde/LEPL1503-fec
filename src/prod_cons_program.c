@@ -72,7 +72,6 @@ void *thread_producer(void *args){
     memset(full_path, 0, sizeof(char) * PATH_MAX );
     strcpy(full_path, info->args.input_dir_path);
     strcat(full_path, "/");
-    DEBUG("The name is %s\n", info->directory_entry->d_name);
     strcat(full_path, info->directory_entry->d_name);
 
     info->input_file = fopen(full_path, "rb");
@@ -87,19 +86,9 @@ void *thread_producer(void *args){
     producer(filename, info->input_file, info->buffer, info->nb_of_file); // here we call the function that creates blocks and deal with them
     // Close this instance file
     fclose(info->input_file);
-
     
-
     // Close the input directory and the output file
-    int err = closedir(info->args.input_dir);
-    if (err < 0)
-    {
-        fprintf(stderr, "Error while closing the input directory containing the instance files\n");
-    }
-    if (info->args.output_stream != stdout)
-    {
-        fclose(info->args.output_stream);
-    }
+    int err;
 
     file_read_error:
     err = closedir(info->args.input_dir);
@@ -151,14 +140,14 @@ void thread_parse_file(int nb_prod_threads, int nb_of_file, args_t args, buffer_
         info_table[i].prod_index = prod_index;
         info_table[i].args = args;
     }
-    DEBUG("The number of threads is %d\n", nb_prod_threads);
+    
     int info_idx = 0;
     while ((directory_entry = readdir(args.input_dir)))
     {
         if(strcmp(directory_entry->d_name, ".") != 0 && strcmp(directory_entry->d_name, "..") != 0){
             
             if (thread_index < nb_prod_threads){
-                DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
+                //DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
                 struct dirent *dir_entry = (struct dirent *) malloc(sizeof(struct dirent));
                 memcpy(dir_entry, directory_entry, sizeof(*directory_entry));
                 (info_table + info_idx)->directory_entry = dir_entry;
@@ -172,7 +161,7 @@ void thread_parse_file(int nb_prod_threads, int nb_of_file, args_t args, buffer_
                 wait_free_threads(threads, nb_prod_threads);
                 thread_index = 0;
                 info_idx = 0;
-                DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
+                //DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
                 struct dirent *dir_entry = (struct dirent *) malloc(sizeof(struct dirent));
                 memcpy(dir_entry, directory_entry, sizeof(*directory_entry));
                 (info_table + info_idx)->directory_entry = dir_entry;
@@ -243,15 +232,14 @@ int parse_args(args_t *args, int argc, char *argv[])
     }
 
     // Source: https://stackoverflow.com/questions/11736060/how-to-read-all-files-in-a-folder-using-c
-    if (NULL == (args->input_dir = opendir(argv[optind])))
+    //DEBUG("The input dir is %s\n", argv[optind]);
+    args->input_dir = opendir(argv[optind]);
+    if (NULL == args->input_dir)
     {
         fprintf(stderr, "Impossible to open the directory containing the input instance files %s: %s\n", argv[optind], strerror(errno));
         return -1;
     }
-    // The following line is not very secure... Ask Prof. Legay and/or wait for LINGI2144 for more information :-)
     strcpy(args->input_dir_path, argv[optind++]);
-
-    
     return 0;
 }
 

@@ -80,6 +80,7 @@ void producer(char *filename, FILE *file, buffer_info **buffer, int nb_of_file){
     sem_post(&full); // il y a une place remplie en plus
 
     // Freeing everything
+    
     free(coeffs[0]);
     free(coeffs);
     
