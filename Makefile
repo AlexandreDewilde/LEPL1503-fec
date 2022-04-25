@@ -26,7 +26,7 @@ tests: $(PROGRAM_FILES) $(TEST_FILES) tests/tools.c tests/tests.c
 
 thread_tests:  $(THREAD_PROGRAM_FILES) $(TEST_FILES) tests/tools.c tests/tests.c
 	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS)  -o tests_suite -g $^ -lcunit $(LIBS)
-	./tests_suite -v
+	valgrind ./tests_suite -v
 	
 clean_tests:
 	rm -f tests_suite

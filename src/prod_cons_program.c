@@ -22,7 +22,7 @@ typedef struct
     buffer_info **buffer;
     int prod_index;
     
-}thread_need_info;
+} thread_need_info;
 
 /**
 *
@@ -65,13 +65,14 @@ thread_need_info *ignore_parent(void *argc){
     return info;
 }
 void *thread_producer(void *args){
-    thread_need_info *info = ignore_parent(args);
+    thread_need_info *info = (thread_need_info *) args;
 
     // Add the directory path to the filename to open it
-    char full_path[PATH_MAX];
-    memset(full_path, 0, sizeof(char) * PATH_MAX);
+    char full_path[PATH_MAX] ;
+    memset(full_path, 0, sizeof(char) * PATH_MAX );
     strcpy(full_path, info->args.input_dir_path);
     strcat(full_path, "/");
+    DEBUG("The name is %s\n", info->directory_entry->d_name);
     strcat(full_path, info->directory_entry->d_name);
 
     info->input_file = fopen(full_path, "rb");
@@ -136,46 +137,56 @@ void thread_parse_file(int nb_prod_threads, int nb_of_file, args_t args, buffer_
     // This is an example of how to open the instance files of the input directory. You may move/edit it during the project
     struct dirent *directory_entry;
     //FILE *input_file;
-     // Here you have to create a thread for each loop entry but N threads must be the number of threads that are given
-    pthread_t threads[nb_prod_threads];
+    // Here you have to create a thread for each loop entry but N threads must be the number of threads that are given
+    //pthread_t threads[nb_prod_threads];
+    pthread_t *threads = (pthread_t *) malloc(nb_prod_threads* sizeof(pthread_t));
     int thread_index = 0;
 
-    thread_need_info *info = (thread_need_info *) malloc(sizeof(thread_need_info));
-    info->nb_input_threads = nb_prod_threads;
-    info->nb_of_file = nb_of_file;
-    info->buffer = buffer;
-    info->prod_index = prod_index;
-    info->args = args;
-
-
+    thread_need_info * info_table = (thread_need_info *) malloc( nb_prod_threads * sizeof(thread_need_info));
+    for (int i = 0; i < nb_prod_threads; i++)
+    {
+        info_table[i].nb_input_threads = nb_prod_threads;
+        info_table[i].nb_of_file = nb_of_file;
+        info_table[i].buffer = buffer;
+        info_table[i].prod_index = prod_index;
+        info_table[i].args = args;
+    }
+    DEBUG("The number of threads is %d\n", nb_prod_threads);
+    int info_idx = 0;
     while ((directory_entry = readdir(args.input_dir)))
     {
-        info->directory_entry = directory_entry;
-        if (thread_index < nb_prod_threads){
-            int err =pthread_create(&(threads[thread_index]),NULL, thread_producer, (void *)info);
-            if(err!=0) {
-                perror("pthread_create error\n");
-            }
-            thread_index += 1;
-        }else{
-            // wait for all threads to be free then restart till the end of folder
-            wait_free_threads(threads, nb_prod_threads);
-            thread_index = 0;
+        if(strcmp(directory_entry->d_name, ".") != 0 && strcmp(directory_entry->d_name, "..") != 0){
+            
+            if (thread_index < nb_prod_threads){
+                DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
+                struct dirent *dir_entry = (struct dirent *) malloc(sizeof(struct dirent));
+                memcpy(dir_entry, directory_entry, sizeof(*directory_entry));
+                (info_table + info_idx)->directory_entry = dir_entry;
+                int err =pthread_create(&(threads[thread_index]),NULL, thread_producer, (void *) (info_table + info_idx) );
+                if(err!=0) {
+                    perror("pthread_create error\n");
+                }
+                thread_index++;
+            }else{
+                // wait for all threads to be free then restart till the end of folder
+                wait_free_threads(threads, nb_prod_threads);
+                thread_index = 0;
+                info_idx = 0;
+                DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
+                struct dirent *dir_entry = (struct dirent *) malloc(sizeof(struct dirent));
+                memcpy(dir_entry, directory_entry, sizeof(*directory_entry));
+                (info_table + info_idx)->directory_entry = dir_entry;
 
-            int err =pthread_create(&(threads[thread_index]),NULL, thread_producer, (void *)info);
-            if(err!=0) {
-                perror("pthread_create error\n");
-            }
-            thread_index += 1;
+                int err =pthread_create(&(threads[thread_index]),NULL, thread_producer, (void *) (info_table + info_idx));
+                if(err!=0) {
+                    perror("pthread_create error\n");
+                }
+                thread_index++;
+            }   
+            info_idx++;
         }
-        
-        
     }
-
-    wait_free_threads(threads, nb_prod_threads);
-
-
-    
+    wait_free_threads(threads, info_idx+1);
 }
 /**
 *
