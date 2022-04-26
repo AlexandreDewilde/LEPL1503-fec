@@ -41,9 +41,18 @@ void usage(char *prog_name)
     fprintf(stderr, "    -v : enable debugging messages. If not set, no such messages will be displayed (except error messages on failure)\n");
 }
 
+
+
 void thread_consume(buffer_info **buffer, FILE *output){
-    consume_in_shared_buffer(buffer, output);
-    
+    pthread_t *consumer = (pthread_t *) malloc(sizeof(pthread_t));
+    consumer_args *arguments = (consumer_args *) malloc(sizeof(consumer_args));
+    arguments->buffer = buffer;
+    arguments->output = output;
+    int err = pthread_create(consumer, NULL, (void *) &consume_in_shared_buffer,(void *) arguments);
+    if(err!=0) {
+        perror("pthread_create error for the consumer\n");
+    }
+    //join the thread here
 }
 
 thread_need_info *ignore_parent(void *argc){
@@ -75,6 +84,7 @@ void *thread_producer(void *args){
     strcat(full_path, info->directory_entry->d_name);
 
     info->input_file = fopen(full_path, "rb");
+    //DEBUG("*************$ The full_path is : %s*******************\n", full_path);
     if (info->input_file == NULL)
     {
         fprintf(stderr, "Failed to open the input file %s: %s\n", full_path, strerror(errno));
@@ -109,6 +119,7 @@ void *thread_producer(void *args){
 
 void wait_free_threads(pthread_t *threads, int nb_input_threads){
     for (int i = 0 ; i < nb_input_threads; i++){
+        DEBUG("Waiting to join thread n° %d\n", i);
         int ret = pthread_join(threads[i], NULL);
         if(ret!=0) {
             perror("pthread_join error\n");
@@ -123,7 +134,7 @@ void wait_free_threads(pthread_t *threads, int nb_input_threads){
 */
 
 void thread_parse_file(int nb_prod_threads, int nb_of_file, args_t args, buffer_info **buffer){
-    // This is an example of how to open the instance files of the input directory. You may move/edit it during the project
+    
     struct dirent *directory_entry;
     //FILE *input_file;
     // Here you have to create a thread for each loop entry but N threads must be the number of threads that are given
@@ -155,13 +166,18 @@ void thread_parse_file(int nb_prod_threads, int nb_of_file, args_t args, buffer_
                 if(err!=0) {
                     perror("pthread_create error\n");
                 }
+                DEBUG("Thread n° : %d \n", thread_index);
                 thread_index++;
+                
             }else{
+                
                 // wait for all threads to be free then restart till the end of folder
                 wait_free_threads(threads, nb_prod_threads);
+                DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
                 thread_index = 0;
                 info_idx = 0;
-                //DEBUG("Info is at %p, thread_index %d\n", info_table + info_idx, thread_index);
+                DEBUG("Thread n° : %d \n", thread_index);
+                
                 struct dirent *dir_entry = (struct dirent *) malloc(sizeof(struct dirent));
                 memcpy(dir_entry, directory_entry, sizeof(*directory_entry));
                 (info_table + info_idx)->directory_entry = dir_entry;
@@ -176,6 +192,7 @@ void thread_parse_file(int nb_prod_threads, int nb_of_file, args_t args, buffer_
         }
     }
     wait_free_threads(threads, info_idx+1);
+    
 }
 /**
 *
@@ -272,8 +289,12 @@ int threads_program(int argc, char *argv[]) {
     // Open a file for each thread
     thread_parse_file(nb_prod_threads, nb_of_file, args, buffer);
 
+    
     //Consume thread from the buffer
     thread_consume(buffer, args.output_stream);
+
+    DEBUG("Done executing program\n");
+    free(buffer);
 
     return 0;
 }

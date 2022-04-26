@@ -17,6 +17,8 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->redudancy,20);
     CU_ASSERT_EQUAL(info->message_size,22832);
 
+    fclose(file);
+
 
     file  = fopen("Binary_doc_test/big.bin","rb");
     get_file_info(file,info);
@@ -26,6 +28,8 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->redudancy,20);
     CU_ASSERT_EQUAL(info->message_size,52955);
 
+    fclose(file);
+
     file  = fopen("Binary_doc_test/medium.bin","rb");
     get_file_info(file,info);
     CU_ASSERT_EQUAL(info->seed,12345);
@@ -34,6 +38,8 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->redudancy,2);
     CU_ASSERT_EQUAL(info->message_size,783);
 
+    fclose(file);
+
     file  = fopen("Binary_doc_test/small.bin","rb");
     get_file_info(file,info);
     CU_ASSERT_EQUAL(info->seed,42);
@@ -41,6 +47,8 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->word_size,3);
     CU_ASSERT_EQUAL(info->redudancy,4);
     CU_ASSERT_EQUAL(info->message_size,23);
+
+    fclose(file);
 
     free(info);
       

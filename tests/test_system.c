@@ -26,14 +26,14 @@ void test_gf_256_full_add_vector_simple_test() {
 
     
     CU_ASSERT_EQUAL(0, memcmp(res, ans, 4));
-    uint8_t *ptr_res = &(*res); 
+    //uint8_t *ptr_res = &(*res); 
 
     //DEBUG_VECTOR imprime le vecteur res calculé
-    DEBUG_VECTOR(ptr_res, 4);
+    //DEBUG_VECTOR(ptr_res, 4);
 
     free(res);
     
-    DEBUG("The function test_gf_256_full_add_vector_simple_test was executed\n"); //This is just a test of debug (verbose)
+    //DEBUG("The function test_gf_256_full_add_vector_simple_test was executed\n"); //This is just a test of debug (verbose)
 }
 
 /**
@@ -87,6 +87,7 @@ void test_gf_256_mul_vector_simple_test(){
     for (uint32_t i = 0; i < symbol_size; i++){
         CU_ASSERT_EQUAL(r_symbole[i],result[i]);
     }  
+    free(r_symbole);
 
     coef=3;
     uint8_t result1[] = {3, 6, 5, 12};
@@ -94,6 +95,8 @@ void test_gf_256_mul_vector_simple_test(){
     for (uint32_t i = 0; i < symbol_size; i++){
         CU_ASSERT_EQUAL(r_symbole1[i],result1[i]);
     }
+    free(r_symbole1);
+
     uint8_t coefs=25;
     uint8_t symboles[] = {77,25,103,200,45,120,77,100,255};
     uint32_t symbol_sizes=9; 
@@ -102,6 +105,7 @@ void test_gf_256_mul_vector_simple_test(){
     for (uint32_t i = 0; i < symbol_sizes; i++){
         CU_ASSERT_EQUAL(r_symboles[i],result2[i]);
     }
+    free(r_symboles);
 }
 
 /**
@@ -114,7 +118,8 @@ void test_gf_256_mul_vector_simple_test(){
 void test_gf_256_mul_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_t nss, uint32_t nrs){
     uint8_t *random_vector1 = generate_random_vector(size_vec);
     //uint8_t random_vector2 = generate_random_vector(size_vec);
-    uint8_t coef =**gen_coefs(seed,nss,nrs);
+    uint8_t ** coefs = gen_coefs(seed,nss,nrs);
+    uint8_t coef = **coefs;
     
     uint8_t *res=gf_256_mul_vector(random_vector1,coef,size_vec);
     for (uint32_t i = 0; i < size_vec; i++){
@@ -122,6 +127,8 @@ void test_gf_256_mul_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_
     }
     free(random_vector1);
     free(res);
+    free(coefs[0]);
+    free(coefs);
 }
 
 /**
@@ -173,6 +180,7 @@ void test_gf_256_inv_vector() {
     for (uint32_t i = 0; i < symbol_sizes; i++){
         CU_ASSERT_EQUAL(r_symboles[i],result2[i]);
     } 
+    free(r_symboles);
 }
 
 /**

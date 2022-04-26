@@ -62,6 +62,7 @@ void producer(char *filename, FILE *file, buffer_info **buffer, int nb_of_file){
         process_block(&blocks[nb_blocks-1], coeffs);
     }
     // Adding the blocks in the consumer_struct
+    //DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
     info_cons->blocks = blocks;
     // Adding the consumer_info struct in the buffer
 
@@ -80,10 +81,6 @@ void producer(char *filename, FILE *file, buffer_info **buffer, int nb_of_file){
     sem_post(&full); // il y a une place remplie en plus
 
     // Freeing everything
-    
     free(coeffs[0]);
     free(coeffs);
-    
-    
-
 }

@@ -38,6 +38,7 @@ void consumer(buffer_info **buffer, FILE *output){
     }
 
     free_blocks(current_index->blocks, current_index->nb_blocks);
+    free(current_index);
 
     //Increment the index of the buffer
     if (cons_index < current_index->nb_of_file){
@@ -48,6 +49,7 @@ void consumer(buffer_info **buffer, FILE *output){
     
     pthread_mutex_unlock(&mutex);
     sem_post(&empty);
+    
     
 
 }

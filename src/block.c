@@ -141,7 +141,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
             unknown_indexes[i] = false;
         }
     }
-    DEBUG_VECTOR_BOOLEAN(unknown_indexes, block->block_size);
+    //DEBUG_VECTOR_BOOLEAN(unknown_indexes, block->block_size);
     return unknowns;
 }
 
@@ -155,15 +155,17 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
             }
             else {
                 // In case the word is not lost we have to substract to solve the system without it 
-                uint8_t *b_sub_line = gf_256_mul_vector(block->message[j], coeffs[i][j], block->word_size);
+                uint8_t * b_sub_line = gf_256_mul_vector(block->message[j], coeffs[i][j], block->word_size);
+                DEBUG("The received pointer is pointing at %p\n", b_sub_line);
+                fflush(stdout);
                 inplace_gf_256_full_add_vector(B[i], b_sub_line, block->word_size);
                 free(b_sub_line);               
             } 
         }
     }
 
-    verbose_linear_system(A, B, unknown, unknown);
-    DEBUG("Size :%d\n", unknown);
+    //verbose_linear_system(A, B, unknown, unknown);
+    //DEBUG("Size :%d\n", unknown);
 }
 
 void process_block(block_t *block, uint8_t **coeffs) {
@@ -268,7 +270,7 @@ void parse_file(char *filename, FILE *file, FILE *output) {
     get_file_info(file, &file_info);
     
     uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.word_size);
-    verbose_matrix(coeffs, file_info.word_size, file_info.block_size);
+    //verbose_matrix(coeffs, file_info.word_size, file_info.block_size);
     
     uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
     uint64_t nb_blocks = ceil(file_info.file_size / (double) step);

@@ -14,12 +14,11 @@ buffer_info **create_shared_buffer(int size){
 
 void produce_in_shared_buffer(buffer_info **buffer,int prod_mutex, buffer_info *data){
     buffer[prod_mutex] = data;
-    
-    
                                            
 }
 
-void consume_in_shared_buffer(buffer_info **buffer, FILE *output) {
-    consumer(buffer, output);
-
+void consume_in_shared_buffer(void * args) {
+    consumer_args *argument = (consumer_args *) args;
+    consumer(argument->buffer, argument->output);
+    free(argument);
 }
