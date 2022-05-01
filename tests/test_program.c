@@ -17,7 +17,7 @@ char* read_file_output(FILE* file, char* filename) {
 
 void test_one_file() {
     char *argv[] = {"./fec", "tests/samples/sample_one_file", "-f", "test.txt"};
-    threads_program(4, argv);
+    program(4, argv);
     
     FILE *file = fopen("test.txt", "rb");
     FILE *file2 = fopen("tests/samples/output_africa.bin", "rb");
@@ -36,7 +36,7 @@ void test_one_file() {
 
 void test_multiple_file() {
     char *argv[] = {"./fec", "Binary_doc_test", "-f", "test.txt"};
-    threads_program(4, argv);
+    program(4, argv);
     char *output_folder = "tests/samples/";
 
     FILE *file = fopen("test.txt", "rb");
