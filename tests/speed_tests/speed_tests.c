@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include "../headers/tools.h"
 #include "../../headers/system.h"
+#include "../../headers/program.h"
 
 
 /**
@@ -118,8 +119,19 @@ void test_gf_256_gaussian_elimination(int repeat) {
     printf("Ended Testing speed of gaussian elimination average time : %lf\n", average_delta_time);
 }
 
+void test_program() {
+    struct timeval stop, start;
+    start_time(&start);
+    char *argv[] = {"./fec", "tests/samples/sample_one_file", "-f", "test.txt"};
+    program(4, argv);
+    end_time(&stop);
+    printf("Time to execute: %lf\n", get_delta_time(start, stop));
+}
+
+
 int main()
 {
+    test_program();
     test_gf_256_gaussian_elimination(1000);
     test_gf_256_gaussian_elimination_random(100, 100, 100);    
 }

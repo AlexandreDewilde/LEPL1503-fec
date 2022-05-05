@@ -7,6 +7,7 @@
 static inline sem_t *
 my_sem_init_with_name(char *name, uint32_t value)
 {
+    if (false) printf("%s", name);
 #ifdef __APPLE__
     int rc = sem_unlink(name);
     sem_t *s;
@@ -40,6 +41,7 @@ my_sem_destroy(sem_t *sem)
 #else
     int err = sem_destroy(sem);
     free(sem);
+    return err;
 #endif /* __APPLE__ */
 }
 
