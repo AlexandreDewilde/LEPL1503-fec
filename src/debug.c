@@ -24,11 +24,9 @@ void verbose_matrix(uint8_t **A, uint32_t size, uint32_t b_size) {
                     fprintf(stderr, "%d ", A[i][j]);
             }
             fprintf(stderr, "]");
-            //DEBUG("Still writing the matrix A\n");
         }
         fprintf(stderr, "\n");
     }
-    //DEBUG("Done writing the matrix A\n");
 }
 
 

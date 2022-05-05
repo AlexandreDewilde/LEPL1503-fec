@@ -20,7 +20,6 @@ void inplace_gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32
 
 uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     uint8_t *mul_vector = (uint8_t *) malloc(symbol_size);
-    fflush(stdout);
     if (mul_vector == NULL) {
         DEBUG("Failed to allocate memory for mul_vector\n");
         exit(EXIT_FAILURE);
@@ -90,7 +89,7 @@ void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t sym
 void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     gf_256_gaussian_elimination_forward(A, b, symbol_size, system_size);
     gf_256_gaussian_elimination_backward(A, b, symbol_size, system_size);
-    //verbose_linear_system(A, b, system_size, symbol_size);
+    verbose_linear_system(A, b, system_size, symbol_size);
 }
 
 uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {

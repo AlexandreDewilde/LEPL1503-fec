@@ -48,9 +48,9 @@ void test_multiple_file() {
         char *str = read_file_output(file, filename);
 
         uint32_t length_path = strlen(output_folder) + 7 + strlen(filename) + 1;
-        char * result_file = (char *) malloc(sizeof(char) * length_path);
+        char *result_file = malloc(length_path);
         sprintf(result_file, "%soutput_%s", output_folder, filename);
-        result_file[length_path-1] = '\0';
+        result_file[length_path] = '\0';
         FILE *file2 = fopen(result_file, "rb");
 
         char *filename2 = malloc(strlen(filename) + 1);
@@ -58,7 +58,6 @@ void test_multiple_file() {
 
         CU_ASSERT_EQUAL(0, strcmp(str, str2));
         
-        free(result_file);
         free(str2);
         free(str);
         free(filename2);
