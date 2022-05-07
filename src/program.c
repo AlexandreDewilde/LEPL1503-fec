@@ -314,8 +314,8 @@ int program(int argc, char *argv[]) {
         exit(EXIT_SUCCESS);
     }
     // The following lines (and every code already present in this skeleton) can be removed, it is just an example to show you how to use the program arguments
-    fprintf(stderr, "\tnumber of threads executing the RLC decoding algorithm in parallel: %" PRIu32 "\n", args.nb_threads);
-    fprintf(stderr, "\tverbose mode: %s\n", args.verbose ? "enabled" : "disabled");
+    DEBUG("\tnumber of threads executing the RLC decoding algorithm in parallel: %" PRIu32 "\n", args.nb_threads);
+    DEBUG("\tverbose mode: %s\n", args.verbose ? "enabled" : "disabled");
 
     // This is an example of how to open the instance files of the input directory. You may move/edit it during the project
     pthread_mutex_init(&mutex, NULL);

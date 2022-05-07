@@ -122,7 +122,7 @@ void test_gf_256_gaussian_elimination(int repeat) {
 void test_program() {
     struct timeval stop, start;
     start_time(&start);
-    char *argv[] = {"./fec", "tests/samples/sample_one_file", "-f", "test.txt"};
+    char *argv[] = {"./fec", "Binary_doc_test", "-f", "test.txt"};
     program(4, argv);
     end_time(&stop);
     printf("Time to execute: %lf\n", get_delta_time(start, stop));
