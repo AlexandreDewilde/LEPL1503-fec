@@ -180,7 +180,14 @@ file_read_error:
 
 void producer() {
     while (!folder_readed || nb_files > file_parsed) {
-        sem_wait(full);
+        struct timespec ts;
+        if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
+        {
+            exit(EXIT_FAILURE);
+        }
+        ts.tv_nsec += 10;
+        int res = sem_timedwait(full, &ts);
+        if (res == -1) continue;
         pthread_mutex_lock(&mutex);
         file_thread current_file_thread = buffer[out];
         out = (out + 1) % buffer_size;
@@ -250,7 +257,14 @@ void producer() {
 
 void consumer() {
     while (!folder_readed || nb_files > file_written) {
-        sem_wait(full_writer);
+        struct timespec ts;
+        if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
+        {
+            exit(EXIT_FAILURE);
+        }
+        ts.tv_nsec += 10;
+        int res = sem_timedwait(full_writer, &ts);
+        if (res == -1) continue;
         pthread_mutex_lock(&mutex_writer);
         output_infos_t current_file_info = buffer_writer[out_writer];
         out_writer = (out_writer + 1) % buffer_size;

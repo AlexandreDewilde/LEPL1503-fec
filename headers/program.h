@@ -11,6 +11,7 @@
 #include <inttypes.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <time.h>
 #include "debug.h"
 #include "block.h"
 #include "portable_semaphore.h"
