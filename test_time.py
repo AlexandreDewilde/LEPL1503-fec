@@ -10,7 +10,7 @@ sns.set_theme()
 
 n = 10
 
-with open("Binary_doc_test/africa.bin", "rb") as f:
+with open("samples/africa.bin", "rb") as f:
     content = f.read()
 
 for nb in range(0, 100, 10):

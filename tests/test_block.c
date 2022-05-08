@@ -8,7 +8,7 @@ void test_get_file_info(){
     FILE *file;
     file_info_t *info= malloc(sizeof(file_info_t));
     
-    file = fopen("Binary_doc_test/africa.bin","rb");
+    file = fopen("samples/africa.bin","rb");
     get_file_info(file,info);
 
     CU_ASSERT_EQUAL(info->seed,1);
@@ -18,7 +18,7 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->message_size,22832);
 
 
-    file  = fopen("Binary_doc_test/big.bin","rb");
+    file  = fopen("samples/big.bin","rb");
     get_file_info(file,info);
     CU_ASSERT_EQUAL(info->seed,1);
     CU_ASSERT_EQUAL(info->block_size,50);
@@ -26,7 +26,7 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->redudancy,20);
     CU_ASSERT_EQUAL(info->message_size,52955);
 
-    file  = fopen("Binary_doc_test/medium.bin","rb");
+    file  = fopen("samples/medium.bin","rb");
     get_file_info(file,info);
     CU_ASSERT_EQUAL(info->seed,12345);
     CU_ASSERT_EQUAL(info->block_size,10);
@@ -34,7 +34,7 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->redudancy,2);
     CU_ASSERT_EQUAL(info->message_size,783);
 
-    file  = fopen("Binary_doc_test/small.bin","rb");
+    file  = fopen("samples/small.bin","rb");
     get_file_info(file,info);
     CU_ASSERT_EQUAL(info->seed,42);
     CU_ASSERT_EQUAL(info->block_size,3);
@@ -50,7 +50,7 @@ void test_get_file_info(){
 
 void test_find_lost_words(){
     FILE *file;
-    file = fopen("Binary_doc_test/small.bin","rb");
+    file = fopen("samples/small.bin","rb");
 
     block_t *block1 = malloc(sizeof(block_t));
     block1->block_size = 3;

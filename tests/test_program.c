@@ -35,7 +35,7 @@ void test_one_file() {
 }
 
 void test_multiple_file() {
-    char *argv[] = {"./fec", "Binary_doc_test", "-f", "test.txt"};
+    char *argv[] = {"./fec", "samples", "-f", "test.txt"};
     program(4, argv);
     char *output_folder = "tests/samples/";
 
