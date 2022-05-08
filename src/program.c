@@ -18,6 +18,7 @@ file_thread buffer[buffer_size];
 output_infos_t buffer_writer[buffer_size];
 pthread_mutex_t mutex;
 pthread_mutex_t mutex_writer;
+pthread_mutex_t mutex_variables;
 
 args_t args;
 
@@ -150,12 +151,17 @@ void folder_producer() {
         pthread_mutex_lock(&mutex);
         buffer[in] = current_file_thread;
         in = (in + 1) % buffer_size;
+        // pthread_mutex_lock(&mutex_variables);
         nb_files++;
+        // pthread_mutex_unlock(&mutex_variables);
         pthread_mutex_unlock(&mutex);
         sem_post(full);
         
     }
+    pthread_mutex_lock(&mutex_variables);
     folder_readed = true;
+    pthread_mutex_unlock(&mutex_variables);
+    
     // Close the input directory and the output file
     int err = closedir(args.input_dir);
     if (err < 0)
@@ -179,7 +185,12 @@ file_read_error:
 
 
 void producer() {
-    while (!folder_readed || nb_files > file_parsed) {
+    while (true) {
+        bool break_loop = false;
+        pthread_mutex_lock(&mutex_variables);
+        if (folder_readed && nb_files <= file_parsed) break_loop = true;
+        pthread_mutex_unlock(&mutex_variables);
+        if (break_loop) break;
         struct timespec ts;
         if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
         {
@@ -191,7 +202,9 @@ void producer() {
         pthread_mutex_lock(&mutex);
         file_thread current_file_thread = buffer[out];
         out = (out + 1) % buffer_size;
+        pthread_mutex_lock(&mutex_variables);
         file_parsed++;
+        pthread_mutex_unlock(&mutex_variables);
         pthread_mutex_unlock(&mutex);
         sem_post(empty);
         output_infos_t current_output_info;
@@ -256,7 +269,12 @@ void producer() {
 }
 
 void consumer() {
-    while (!folder_readed || nb_files > file_written) {
+    while (true) {
+        bool break_loop = false;
+        pthread_mutex_lock(&mutex_variables);
+        if (folder_readed && nb_files <= file_written) break_loop = true;
+        pthread_mutex_unlock(&mutex_variables);
+        if (break_loop) break;
         struct timespec ts;
         if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
         {
@@ -320,6 +338,7 @@ int program(int argc, char *argv[]) {
     // This is an example of how to open the instance files of the input directory. You may move/edit it during the project
     pthread_mutex_init(&mutex, NULL);
     pthread_mutex_init(&mutex_writer, NULL);
+    pthread_mutex_init(&mutex_variables, NULL);
     empty = sem_init(buffer_size);
     empty_writer = sem_init(buffer_size);
     full = sem_init(0);
@@ -341,6 +360,9 @@ int program(int argc, char *argv[]) {
     sem_destroy(empty);
     sem_destroy(full);
     sem_destroy(full_writer);
+    pthread_mutex_destroy(&mutex);
+    pthread_mutex_destroy(&mutex_writer);
+    pthread_mutex_destroy(&mutex_variables);
     if (args.output_stream != stdout)
     {
         fclose(args.output_stream);
