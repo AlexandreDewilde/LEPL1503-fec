@@ -43,7 +43,6 @@ void test_get_file_info(){
     CU_ASSERT_EQUAL(info->message_size,23);
 
     free(info);
-      
 }
 
 
@@ -66,9 +65,6 @@ void test_find_lost_words(){
     fclose(file);
     free(block1);
 }
-
-
-
 
 void test_prepare_block();
 void test_make_block();
