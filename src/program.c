@@ -270,19 +270,14 @@ void producer() {
 
 void consumer() {
     while (true) {
-        bool break_loop = false;
         pthread_mutex_lock(&mutex_variables);
-        if (folder_readed && nb_files <= file_written) break_loop = true;
-        pthread_mutex_unlock(&mutex_variables);
-        if (break_loop) break;
-        struct timespec ts;
-        if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
-        {
-            exit(EXIT_FAILURE);
+        if (folder_readed && nb_files <= file_written) {
+            pthread_mutex_unlock(&mutex_variables);
+            break;
         }
-        ts.tv_nsec += 10;
-        int res = sem_timedwait(full_writer, &ts);
-        if (res == -1) continue;
+        pthread_mutex_unlock(&mutex_variables);
+
+        sem_wait(full_writer);
         pthread_mutex_lock(&mutex_writer);
         output_infos_t current_file_info = buffer_writer[out_writer];
         out_writer = (out_writer + 1) % buffer_size;
