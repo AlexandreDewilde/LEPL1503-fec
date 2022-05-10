@@ -139,8 +139,6 @@ void folder_producer() {
         // This is a simple example of how to use the verbose mode
         DEBUG("Successfully opened the file %s\n", full_path);
 
-        // parse_file(directory_entry->d_name, input_file, args.output_stream);
-
         file_thread current_file_thread;
         current_file_thread.filename = malloc(strlen(directory_entry->d_name)+1);
         strcpy(current_file_thread.filename, directory_entry->d_name);
@@ -161,6 +159,19 @@ void folder_producer() {
     pthread_mutex_lock(&mutex_variables);
     folder_readed = true;
     pthread_mutex_unlock(&mutex_variables);
+
+    for (int i = 0; i < args.nb_threads; i++) {
+
+        sem_wait(empty);
+        pthread_mutex_lock(&mutex);
+        file_thread current_file_thread;
+        current_file_thread.filename = NULL;
+        buffer[in] = current_file_thread;
+        in = (in + 1) % buffer_size;
+        pthread_mutex_unlock(&mutex);
+        sem_post(full); 
+    }
+
     
     // Close the input directory and the output file
     int err = closedir(args.input_dir);
@@ -186,19 +197,15 @@ file_read_error:
 
 void producer() {
     while (true) {
-        bool break_loop = false;
         pthread_mutex_lock(&mutex_variables);
-        if (folder_readed && nb_files <= file_parsed) break_loop = true;
-        pthread_mutex_unlock(&mutex_variables);
-        if (break_loop) break;
-        struct timespec ts;
-        if (clock_gettime(CLOCK_REALTIME, &ts) == -1)
-        {
-            exit(EXIT_FAILURE);
+        if (folder_readed && nb_files <= file_parsed) {
+            pthread_mutex_unlock(&mutex_variables);
+            break;
         }
-        ts.tv_nsec += 10;
-        int res = sem_timedwait(full, &ts);
-        if (res == -1) continue;
+        pthread_mutex_unlock(&mutex_variables);
+
+        
+        sem_wait(full);
         pthread_mutex_lock(&mutex);
         file_thread current_file_thread = buffer[out];
         out = (out + 1) % buffer_size;
@@ -207,6 +214,9 @@ void producer() {
         pthread_mutex_unlock(&mutex_variables);
         pthread_mutex_unlock(&mutex);
         sem_post(empty);
+
+        if (!current_file_thread.filename) break;
+
         output_infos_t current_output_info;
         file_info_t file_info;
         get_file_info(current_file_thread.file, &file_info);
