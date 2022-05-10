@@ -1,28 +1,28 @@
 #include "../headers/block.h"
 
-void get_file_info(FILE *file, file_info_t *file_info) {
-
-    size_t readed_chunks;
-
-    // Go to the end of the file to calculate the file size
+int64_t get_file_size(FILE *file) {
     int ret = fseek(file, 0L, SEEK_END);
     if (ret == -1) {
         DEBUG("Error with fseek : %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-
     int64_t byte_size = ftell(file);
     if (byte_size == -1) {
         DEBUG("Error with ftell : %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
-
-    file_info->file_size =  byte_size - 24;
-    // Go back to the start of the file
     rewind(file);
+    return byte_size;
+}
+
+
+void get_file_info(FILE *file, file_info_t *file_info) {
+
+    file_info->file_size =  get_file_size(file) - 24;
+
     
     // Reads file header with all the information
-
+    size_t readed_chunks;
     readed_chunks = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
     if (readed_chunks != 1) {
         deal_error_reading_file(file);

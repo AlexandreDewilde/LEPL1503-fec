@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Wall -Werror -Wextra  --std=gnu99
 LIBS=-lcunit -lpthread -lm
 INCLUDE_HEADERS_DIRECTORY=-Iheaders
-PROGRAM_FILES=src/program.c src/debug.c src/tinymt32.c src/system.c src/block.c
+PROGRAM_FILES=src/program.c src/debug.c src/tinymt32.c src/system.c src/block.c src/utils.c
 TEST_FILES=tests/test_block.c  tests/test_program.c tests/test_tinymt32.c tests/test_system.c
 
 fec: $(PROGRAM_FILES) main.c  # add your other object files needed to compile your program here. !! 

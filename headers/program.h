@@ -14,17 +14,9 @@
 #include <limits.h>
 #include <time.h>
 #include "debug.h"
+#include "utils.h"
 #include "block.h"
 #include "portable_semaphore.h"
-
-typedef struct
-{
-    DIR *input_dir;
-    char input_dir_path[PATH_MAX];
-    FILE *output_stream;
-    uint8_t nb_threads;
-    bool verbose;
-} args_t;
 
 typedef struct {
     char *filename;

@@ -1,17 +1,16 @@
 #ifndef BLOCK_H
 #define BLOCK_H
+
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdint.h>
-#include <string.h>
 #include <dirent.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <math.h>
+
 #include "system.h"
-#include "message.h"
 #include "debug.h"
-#include "portable_endian.h"
+
 
 typedef struct {
     uint32_t block_size, word_size, redudancy;
