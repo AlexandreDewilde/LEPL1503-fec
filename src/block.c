@@ -189,14 +189,14 @@ void process_block(block_t *block, uint8_t **coeffs) {
             exit(EXIT_FAILURE);
         }
 
-        uint8_t *temp_alloc = malloc(unknowns * block->word_size);
+        uint8_t *temp_alloc = malloc(unknowns * unknowns);
         if (temp_alloc == NULL) {
             DEBUG("Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
         }
 
         for (uint32_t i = 0; i < unknowns; i++) {
-            A[i] = temp_alloc + i * block->word_size;
+            A[i] = temp_alloc + i * unknowns;
         }
         
         temp_alloc = malloc(unknowns * block->word_size);

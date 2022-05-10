@@ -16,6 +16,7 @@
 #include "debug.h"
 #include "utils.h"
 #include "block.h"
+#include "portable_endian.h"
 #include "portable_semaphore.h"
 
 typedef struct {

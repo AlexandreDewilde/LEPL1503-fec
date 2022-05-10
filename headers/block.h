@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <math.h>
 
+#include "portable_endian.h"
 #include "system.h"
 #include "debug.h"
 

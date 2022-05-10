@@ -77,12 +77,16 @@ void folder_producer() {
     folder_readed = true;
     pthread_mutex_unlock(&mutex_variables);
 
+    file_thread current_file_thread;
+    current_file_thread.filename = NULL;
+    current_file_thread.file = NULL;
+    current_file_thread.output = NULL;
+    
     for (int i = 0; i < args.nb_threads; i++) {
 
         sem_wait(empty);
         pthread_mutex_lock(&mutex);
-        file_thread current_file_thread;
-        current_file_thread.filename = NULL;
+        
         buffer[in] = current_file_thread;
         in = (in + 1) % buffer_size;
         pthread_mutex_unlock(&mutex);
@@ -128,7 +132,7 @@ void producer() {
         file_info_t file_info;
         get_file_info(current_file_thread.file, &file_info);
         
-        uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.word_size);
+        uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.redudancy);
         verbose_matrix(coeffs, file_info.word_size, file_info.block_size);
         
         uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
