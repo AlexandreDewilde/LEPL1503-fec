@@ -58,7 +58,6 @@ void inplace_gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_si
 void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     for (uint32_t k = 0; k < system_size; k++) {
         for (uint32_t i = k + 1; i < system_size; i++) {
-            if (A[i][k] == 0) continue;
             uint8_t factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
             
             for (uint32_t j = 0; j < system_size; j++) {
