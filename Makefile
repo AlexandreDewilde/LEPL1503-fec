@@ -12,7 +12,7 @@ fec: $(PROGRAM_FILES) main.c  # add your other object files needed to compile yo
 
 
 %.o: %.c                  # if for example you want to compute example.c this will create an object file called example.o in the same directory as example.c. Don't forget to clean it in your "make clean"
-	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o $@ -c $< -O3
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o $@ -c $< -Ofast
 
 clean:
 	rm -f src/*.o

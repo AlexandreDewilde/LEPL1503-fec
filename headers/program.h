@@ -22,12 +22,10 @@
 typedef struct {
     char *filename;
     FILE *file;
-    FILE *output;
-} file_thread;
+} file_thread_t;
 
 typedef struct {
     char *filename;
-    FILE *output;
     uint64_t message_size;
     block_t *blocks;
     uint64_t nb_blocks;

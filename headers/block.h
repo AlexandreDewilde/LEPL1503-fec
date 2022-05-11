@@ -53,7 +53,4 @@ void write_block(block_t *block, FILE *output);
 
 void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding);
 
-void parse_file(char *filename, FILE *file, FILE *output);
-
-
 #endif /* BLOCK_H */
