@@ -3,12 +3,12 @@
 int64_t get_file_size(FILE *file) {
     int ret = fseek(file, 0L, SEEK_END);
     if (ret == -1) {
-        DEBUG("Error with fseek : %s\n", strerror(errno));
+        fprintf(stderr, "Error with fseek : %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     int64_t byte_size = ftell(file);
     if (byte_size == -1) {
-        DEBUG("Error with ftell : %s\n", strerror(errno));
+        fprintf(stderr, "Error with ftell : %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     rewind(file);
@@ -66,20 +66,20 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     // Allocate 2D array to store the message stored in this block
     block->message = malloc(block->block_size * sizeof(uint8_t*));
     if (block->message == NULL) {
-        DEBUG("Failed to allocate memory for block message\n");
+        fprintf(stderr, "Failed to allocate memory for block message\n");
         exit(EXIT_FAILURE);
     }
 
     // Allocate 2D array to store the redudant symbols of the block
     block->redudant_symbols = malloc(block->redudancy*sizeof(uint8_t*));
     if (block->redudant_symbols == NULL) {
-        DEBUG("Failed to allocate memory for redudants symbols\n");
+        fprintf(stderr, "Failed to allocate memory for redudants symbols\n");
         exit(EXIT_FAILURE);
     }
 
     uint8_t *temp = malloc(block->block_size * block->word_size);
     if (temp == NULL) {
-        DEBUG("Failed to allocate memory for message\n");
+        fprintf(stderr, "Failed to allocate memory for message\n");
         exit(EXIT_FAILURE);
     }
 
@@ -89,7 +89,7 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
 
     temp = malloc(block->redudancy * block->word_size);
     if (temp == NULL) {
-        DEBUG("Failed to allocate memory for redudancy symbols\n");
+        fprintf(stderr, "Failed to allocate memory for redudancy symbols\n");
         exit(EXIT_FAILURE);
     }
 
@@ -170,7 +170,7 @@ void process_block(block_t *block, uint8_t **coeffs) {
    
     bool *unknowns_indexes = malloc(block->block_size);
     if (unknowns_indexes == NULL) {
-        DEBUG("Failed to allocated unknown indexes vector\n");
+        fprintf(stderr, "Failed to allocated unknown indexes vector\n");
         exit(EXIT_FAILURE);
     }
 
@@ -180,18 +180,18 @@ void process_block(block_t *block, uint8_t **coeffs) {
     if (unknowns) {
         uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
         if (A == NULL) {
-            DEBUG("Error while allocating memory processing block\n");
+            fprintf(stderr, "Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
         }
         uint8_t **B = malloc(unknowns * sizeof(uint8_t *));
         if (B == NULL) {
-            DEBUG("Error while allocating memory processing block\n");
+            fprintf(stderr, "Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
         }
 
         uint8_t *temp_alloc = malloc(unknowns * unknowns);
         if (temp_alloc == NULL) {
-            DEBUG("Error while allocating memory processing block\n");
+            fprintf(stderr, "Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
         }
 
@@ -201,7 +201,7 @@ void process_block(block_t *block, uint8_t **coeffs) {
         
         temp_alloc = malloc(unknowns * block->word_size);
         if (temp_alloc == NULL) {
-            DEBUG("Error while allocating memory processing block\n");
+            fprintf(stderr, "Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
         }
 
@@ -233,7 +233,7 @@ void write_block(block_t *block, FILE *output) {
     for (uint32_t j = 0; j < block->block_size; j++) {
         size_t written = fwrite(block->message[j], block->word_size, 1, output);
         if (written != 1) {
-            DEBUG("Error writing to output\n");
+            fprintf(stderr, "Error writing to output\n");
             exit(EXIT_FAILURE);
         }
     }
@@ -244,13 +244,13 @@ void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t
     for (uint32_t j = 0; j < remaining - 1; j++) {
         size_t written = fwrite(block->message[j], block->word_size, 1, output);
         if (written != 1) {
-            DEBUG("Error writing to output\n");
+            fprintf(stderr, "Error writing to output\n");
             exit(EXIT_FAILURE);
         }
     }
     size_t written = fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
     if (written != 1) {
-        DEBUG("Error writing to output\n");
+        fprintf(stderr, "Error writing to output\n");
         exit(EXIT_FAILURE);
     }
 }

@@ -4,10 +4,11 @@ static int SIGNAL = 0;
 
 void deal_error_reading_file(FILE *file) {
     if (ferror(file)) {
-        DEBUG("This error occured reading the file : %s\n", strerror(errno));
+
+        fprintf(stderr, "This error occured reading the file : %s\n", strerror(errno));
     }
     else {
-        DEBUG("File ended, check that file is formated correctly\n");
+        fprintf(stderr, "File ended, check that file is formated correctly\n");
     }
     exit(EXIT_FAILURE);
 }

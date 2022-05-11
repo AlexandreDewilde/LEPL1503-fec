@@ -57,10 +57,14 @@ void folder_producer() {
         DEBUG("Successfully opened the file %s\n", full_path);
 
         file_thread_t current_file_thread = {
-            .filename = malloc(strlen(directory_entry->d_name)+1),
+            .filename = malloc(strlen(directory_entry->d_name)+1), // Error treated after init
             .file = input_file
         };
-
+        
+        if (!current_file_thread.filename) {
+            fprintf(stderr, "Error to allocate memory for filename\n");
+            exit(EXIT_FAILURE);
+        }
         strcpy(current_file_thread.filename, directory_entry->d_name);
 
 
@@ -138,14 +142,14 @@ void producer() {
         get_file_info(current_file_thread.file, &file_info);
         
         uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.redudancy);
-        verbose_matrix(coeffs, file_info.word_size, file_info.block_size);
+        verbose_matrix(coeffs, file_info.redudancy, file_info.block_size);
         
         uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
         uint64_t nb_blocks = ceil(file_info.file_size / (double) step);
 
         block_t *blocks = malloc(nb_blocks*sizeof(block_t));
         if (blocks == NULL) {
-            DEBUG("Error allocating memory for block\n");
+            fprintf(stderr, "Error allocating memory for block\n");
             exit(EXIT_FAILURE);
         }
 
@@ -159,7 +163,7 @@ void producer() {
 
         int64_t current_pos = ftell(current_file_thread.file);
         if (current_pos == -1) {
-            DEBUG("Error with ftell : %s\n", strerror(errno));
+            fprintf(stderr, "Error with ftell : %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
         uint32_t remaining = ( (file_info.file_size + 24 - current_pos) / file_info.word_size) - file_info.redudancy;
@@ -214,19 +218,19 @@ void consumer() {
         uint32_t filename_length = htobe32(strlen(current_file_info.filename));
         size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, args.output_stream);
         if (written != 1) {
-            DEBUG("Error writing to output the length of filename");
+            fprintf(stderr, "Error writing to output the length of filename");
             exit(EXIT_FAILURE);
         }
 
         current_file_info.message_size = htobe64(current_file_info.message_size);
         written = fwrite(&current_file_info.message_size, sizeof(uint64_t), 1, args.output_stream);
         if (written != 1) {
-            DEBUG("Error writing to output the message size\n");
+            fprintf(stderr, "Error writing to output the message size\n");
             exit(EXIT_FAILURE);
         }
         written = fwrite(current_file_info.filename, strlen(current_file_info.filename), 1, args.output_stream);
         if (written != 1) {
-            printf("Error writing to output the filename\n");
+            fprintf(stderr, "Error writing to output the filename\n");
             exit(EXIT_FAILURE);
         }
         for (uint64_t i = 0; i < current_file_info.nb_blocks - current_file_info.uncomplete_block; i++) {

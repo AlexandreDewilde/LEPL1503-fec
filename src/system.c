@@ -3,7 +3,7 @@
 uint8_t *gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32_t symbol_size) {
     uint8_t *add_vector = (uint8_t *) malloc(symbol_size);
     if (add_vector == NULL) {
-        DEBUG("Failed to allocate memory for add vector\n");
+        fprintf(stderr, "Failed to allocate memory for add vector\n");
         exit(EXIT_FAILURE);
     }
     for (uint32_t i = 0; i < symbol_size; i++) {
@@ -21,7 +21,7 @@ void inplace_gf_256_full_add_vector(uint8_t *symbol_1, uint8_t *symbol_2, uint32
 uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     uint8_t *mul_vector = (uint8_t *) malloc(symbol_size);
     if (mul_vector == NULL) {
-        DEBUG("Failed to allocate memory for mul_vector\n");
+        fprintf(stderr, "Failed to allocate memory for mul_vector\n");
         exit(EXIT_FAILURE);
     }
     for (uint32_t i = 0; i < symbol_size; i++) {
@@ -40,7 +40,7 @@ void inplace_gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_si
 uint8_t *gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     uint8_t *inv_vector = (uint8_t *) malloc(symbol_size);
     if (inv_vector == NULL) {
-        DEBUG("Failed to allocate memory for inv_vector\n");
+        fprintf(stderr, "Failed to allocate memory for inv_vector\n");
         exit(EXIT_FAILURE);
     }
     for (uint32_t i = 0; i < symbol_size; i++) {
@@ -101,7 +101,17 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
 
     // make use of cache memory for perfomance
     uint8_t **coefs = malloc(nrs * sizeof(uint8_t *));
+    if (!coefs) {
+        fprintf(stderr, "Failed to allocate memory for coefficients\n");
+        exit(EXIT_FAILURE);
+    }
+
     uint8_t *temp = malloc(nrs * nss);
+
+    if (!temp) {
+        fprintf(stderr, "Failed to allocate memory for coefficients\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (uint32_t i = 0; i < nrs; i++) {
         coefs[i] = temp + (i * nss);
