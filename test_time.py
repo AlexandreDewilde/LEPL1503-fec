@@ -41,7 +41,8 @@ plt.xlabel("Nombre N de threads de calcul")
 plt.ylabel("Temps en secondes mis pour une exécution")
 plt.xticks(range(1, len(tests)+1))
 plt.legend(loc='best')
-plt.show()
+plt.savefig("ExecutionTimeByNumberOfThreads.png")
+plt.close()
 
 tests = []
 for i in range(1, 8):
@@ -61,8 +62,8 @@ plt.xlabel("Nombre N de threads de calcul")
 plt.ylabel("Temps en secondes mis pour une exécution")
 plt.xticks(range(1, len(tests)+1))
 plt.legend(loc='best')
-plt.show()
-
+plt.savefig("ExecutionByNumerOfThreadsDefinedFolder.png")
+plt.close()
 
 
 tests_c_mono = []
@@ -100,8 +101,8 @@ plt.xticks(X+width, range(20, 100, 20))
 plt.title("Comparaison du programme C: 1 vs 4 threads")
 plt.xlabel("Nombre de fichiers africa.bin")
 plt.ylabel("Temps d'exécution en secondes")
-plt.show()
-
+plt.savefig("ExecutionTimeByProgram.png")
+plt.close()
 
 tests_c_mono = []
 tests_c = []
