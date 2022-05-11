@@ -109,7 +109,7 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
 
     for (uint32_t i = 0; i < nrs; i++) {
         for (uint32_t j = 0; j < nss; j++) {
-            coefs[i][j] = tinymt32_generate_uint32(&prng);
+            coefs[i][j] = (uint8_t) tinymt32_generate_uint32(&prng);
             if (coefs[i][j] == 0) coefs[i][j] = 1;
         }
     }

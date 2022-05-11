@@ -2,7 +2,7 @@
 #define buffer_size 8
 
 
-int passed_buffer = 0;
+
 
 int in = 0;
 int out = 0;
@@ -18,6 +18,8 @@ sem_t *full_writer;
 sem_t *empty_writer;
 pthread_mutex_t mutex_writer;
 output_infos_t buffer_writer[buffer_size];
+
+int skipped_buffer = 0;
 
 args_t args;
 
@@ -121,7 +123,7 @@ void producer() {
         if (!current_file_thread.filename) {
             output_infos_t current_output_info;
             memset(&current_output_info, 0, sizeof(current_output_info));
-            
+
             sem_wait(empty_writer);
             pthread_mutex_lock(&mutex_writer);
             buffer_writer[in_writer] = current_output_info;
@@ -203,8 +205,8 @@ void consumer() {
         sem_post(empty_writer);
 
         if (!current_file_info.filename) {
-            passed_buffer++;
-            if (passed_buffer >= args.nb_threads) break;
+            skipped_buffer++;
+            if (skipped_buffer >= args.nb_threads) break;
             continue;
         }
         
