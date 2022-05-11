@@ -6,7 +6,6 @@
 #include <dirent.h>
 #include <errno.h>
 #include <stdbool.h>
-#include <math.h>
 
 #include "portable_endian.h"
 #include "system.h"

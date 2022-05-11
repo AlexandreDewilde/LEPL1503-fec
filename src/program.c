@@ -23,6 +23,14 @@ int skipped_buffer = 0;
 
 args_t args;
 
+int math_ceil(double nb) {
+    int nb_int = (int) nb;
+    if (nb == (double) nb_int) {
+        return nb_int;
+    }
+    return nb_int + 1;
+
+}
 
 void folder_producer() {
     struct dirent *directory_entry;
@@ -114,6 +122,7 @@ file_read_error:
 }
 
 
+
 void producer() {
     while (true) {
        
@@ -145,7 +154,7 @@ void producer() {
         verbose_matrix(coeffs, file_info.redudancy, file_info.block_size);
         
         uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
-        uint64_t nb_blocks = ceil(file_info.file_size / (double) step);
+        uint64_t nb_blocks = math_ceil(file_info.file_size / (double) step);
 
         block_t *blocks = malloc(nb_blocks*sizeof(block_t));
         if (blocks == NULL) {
