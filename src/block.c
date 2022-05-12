@@ -64,63 +64,34 @@ void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint
     block->redudancy = redudancy;
 
     // Allocate 2D array to store the message stored in this block
-    block->message = malloc(block->block_size * sizeof(uint8_t*));
+    block->message = malloc((block->block_size + block->redudancy) * sizeof(uint8_t*));
     if (block->message == NULL) {
         fprintf(stderr, "Failed to allocate memory for block message\n");
         exit(EXIT_FAILURE);
     }
 
-    // Allocate 2D array to store the redudant symbols of the block
-    block->redudant_symbols = malloc(block->redudancy*sizeof(uint8_t*));
-    if (block->redudant_symbols == NULL) {
-        fprintf(stderr, "Failed to allocate memory for redudants symbols\n");
-        exit(EXIT_FAILURE);
-    }
-
-    uint8_t *temp = malloc(block->block_size * block->word_size);
+    uint8_t *temp = malloc((block->block_size + block->redudancy) * block->word_size);
     if (temp == NULL) {
         fprintf(stderr, "Failed to allocate memory for message\n");
         exit(EXIT_FAILURE);
     }
 
-    for (uint32_t i = 0; i < block->block_size; i++) {
+    for (uint32_t i = 0; i < block->block_size + block->redudancy; i++) {
         block->message[i] = temp + i * block->word_size;
-    }
-
-    temp = malloc(block->redudancy * block->word_size);
-    if (temp == NULL) {
-        fprintf(stderr, "Failed to allocate memory for redudancy symbols\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (uint32_t i = 0; i < block->redudancy; i++) {
-        block->redudant_symbols[i] = temp + i * block->word_size;
     }
 }
 
 void free_block(block_t *block) {
     free(block->message[0]);
     free(block->message);
-    free(block->redudant_symbols[0]);
-    free(block->redudant_symbols);
 }
 
 void make_block(FILE *file, block_t *block) {
     size_t readed_chunks;
-    // Read message from file and stored it in the block structure
-    for (uint8_t i = 0; i < block->block_size; i++) {
-        readed_chunks = fread(block->message[i], block->word_size, 1, file);
-        if (readed_chunks != 1) {
-            deal_error_reading_file(file);
-        }
-    }
-
-    // Read Redudant symbols and stored it in the block structure
-    for (uint8_t i = 0; i < block->redudancy; i++) {
-        readed_chunks = fread(block->redudant_symbols[i], block->word_size, 1, file);
-        if (readed_chunks != 1) {
-            deal_error_reading_file(file);
-        }
+    
+    readed_chunks = fread(block->message[0], block->word_size, block->block_size + block->redudancy, file);
+    if (readed_chunks != block->block_size + block->redudancy) {
+        deal_error_reading_file(file);
     }
 }
 
@@ -147,6 +118,13 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
 
 void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs) {
 
+    uint8_t *b_sub_line = malloc(block->word_size);
+
+    if (!b_sub_line) {
+        printf("Error to allocate memory for linear system");
+        exit(EXIT_FAILURE);
+    }
+
     for (uint32_t i = 0; i < unknown; i++) {
         uint32_t temp = 0;
         for (uint32_t j = 0; j < block->block_size; j++) {
@@ -155,12 +133,12 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
             }
             else {
                 // In case the word is not lost we have to substract to solve the system without it 
-                uint8_t *b_sub_line = gf_256_mul_vector(block->message[j], coeffs[i][j], block->word_size);
-                inplace_gf_256_full_add_vector(B[i], b_sub_line, block->word_size);
-                free(b_sub_line);               
+                gf_256_mul_vector_buffer(b_sub_line, block->message[j], coeffs[i][j], block->word_size);
+                inplace_gf_256_full_add_vector(B[i], b_sub_line, block->word_size);           
             } 
         }
     }
+    free(b_sub_line);  
 
     verbose_linear_system(A, B, unknown, unknown);
     DEBUG("Size :%d\n", unknown);
@@ -207,7 +185,7 @@ void process_block(block_t *block, uint8_t **coeffs) {
 
         for (uint32_t i = 0; i < unknowns; i++) {
             B[i] = temp_alloc + i * block->word_size;
-            memcpy(B[i], block->redudant_symbols[i], block->word_size);
+            memcpy(B[i], block->message[block->block_size + i], block->word_size);
         }
 
         make_linear_system(A, B, unknowns_indexes, unknowns, block, coeffs);
@@ -230,25 +208,22 @@ void process_block(block_t *block, uint8_t **coeffs) {
 
 
 void write_block(block_t *block, FILE *output) {
-    for (uint32_t j = 0; j < block->block_size; j++) {
-        size_t written = fwrite(block->message[j], block->word_size, 1, output);
-        if (written != 1) {
-            fprintf(stderr, "Error writing to output\n");
-            exit(EXIT_FAILURE);
-        }
+    size_t written = fwrite(block->message[0], block->word_size, block->block_size, output);
+    if (written != block->block_size) {
+        fprintf(stderr, "Error writing to output\n");
+        exit(EXIT_FAILURE);
     }
 }
 
 
 void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding) {
-    for (uint32_t j = 0; j < remaining - 1; j++) {
-        size_t written = fwrite(block->message[j], block->word_size, 1, output);
-        if (written != 1) {
-            fprintf(stderr, "Error writing to output\n");
-            exit(EXIT_FAILURE);
-        }
+
+    size_t written = fwrite(block->message[0], block->word_size, remaining - 1, output);
+    if (written != remaining - 1) {
+        fprintf(stderr, "Error writing to output\n");
+        exit(EXIT_FAILURE);
     }
-    size_t written = fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
+    written = fwrite(block->message[remaining - 1], block->word_size - padding, 1, output);
     if (written != 1) {
         fprintf(stderr, "Error writing to output\n");
         exit(EXIT_FAILURE);

@@ -37,6 +37,12 @@ void inplace_gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_si
     }
 }
 
+void gf_256_mul_vector_buffer(uint8_t *buffer, uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
+    for (uint32_t i = 0; i < symbol_size; i++) {
+        buffer[i] = gf256_mul_table[coef][symbol[i]];
+    }
+}
+
 uint8_t *gf_256_inv_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size) {
     uint8_t *inv_vector = (uint8_t *) malloc(symbol_size);
     if (inv_vector == NULL) {
@@ -73,16 +79,30 @@ void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symb
 
 void gf_256_gaussian_elimination_backward(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {
     // Subsituation  arrière
+    uint8_t *factor_tab = malloc(symbol_size);
+    if (!factor_tab) {
+        fprintf(stderr, "Failed to allocate memory for factor tab");
+        exit(EXIT_FAILURE);
+    }
+    uint8_t *res = malloc(symbol_size);
+    if (!res) {
+        fprintf(stderr, "Failed to allocate memory for gauss backward search\n");
+        exit(EXIT_FAILURE);
+    }
+
     uint32_t i = system_size - 1;
     do {
+        for (uint32_t j = 0; j < symbol_size; j++) factor_tab[j] = 0;
         for (uint32_t j = i + 1; j < system_size; j++) {
-            for (uint32_t k = 0; k < symbol_size; k++) {
-                b[i][k] ^= gf256_mul_table[b[j][k]][A[i][j]];
-            }
+            gf_256_mul_vector_buffer(res, b[j], A[i][j], symbol_size);
+            inplace_gf_256_full_add_vector(factor_tab, res, symbol_size);
         }
+        inplace_gf_256_full_add_vector(b[i], factor_tab, symbol_size);
         inplace_gf_256_inv_vector(b[i], A[i][i], symbol_size);
 
     } while(i--);
+    free(factor_tab);
+    free(res);
 }
 
 void gf_256_gaussian_elimination(uint8_t **A, uint8_t **b, uint32_t symbol_size, uint32_t system_size) {

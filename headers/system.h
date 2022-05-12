@@ -53,6 +53,9 @@ uint8_t *gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
  */
 void inplace_gf_256_mul_vector(uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
 
+
+void gf_256_mul_vector_buffer(uint8_t *buffer, uint8_t *symbol, uint8_t coef, uint32_t symbol_size);
+
 /**
  *
  * Divide a vector in a Galois Field 256 by a coefficient
