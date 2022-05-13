@@ -65,7 +65,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes);
  */
 void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs);
 
-void process_block(block_t *block, uint8_t **coeffs);
+void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes);
 
 void write_block(block_t *block, FILE *output);
 

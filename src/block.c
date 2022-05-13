@@ -130,9 +130,8 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
     DEBUG("Size :%d\n", unknown);
 }
 
-void process_block(block_t *block, uint8_t **coeffs) {
+void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes) {
    
-    bool *unknowns_indexes = malloc(block->block_size);
     if (unknowns_indexes == NULL) {
         fprintf(stderr, "Failed to allocated unknown indexes vector\n");
         exit(EXIT_FAILURE);
@@ -142,33 +141,20 @@ void process_block(block_t *block, uint8_t **coeffs) {
 
     // If there is no unknown, those ops are useless
     if (unknowns) {
-        uint8_t **A = malloc(unknowns * sizeof(uint8_t*));
+        uint8_t **A = malloc(2 * unknowns * sizeof(uint8_t*) + unknowns * unknowns + unknowns * block->word_size);
         if (A == NULL) {
             fprintf(stderr, "Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
         }
-        uint8_t **B = malloc(unknowns * sizeof(uint8_t *));
-        if (B == NULL) {
-            fprintf(stderr, "Error while allocating memory processing block\n");
-            exit(EXIT_FAILURE);
-        }
+        uint8_t **B = A + unknowns;
 
-        uint8_t *temp_alloc = malloc(unknowns * unknowns);
-        if (temp_alloc == NULL) {
-            fprintf(stderr, "Error while allocating memory processing block\n");
-            exit(EXIT_FAILURE);
-        }
+        uint8_t *temp_alloc = (uint8_t *) (A + 2 * unknowns);
 
         for (uint32_t i = 0; i < unknowns; i++) {
             A[i] = temp_alloc + i * unknowns;
         }
         
-        temp_alloc = malloc(unknowns * block->word_size);
-        if (temp_alloc == NULL) {
-            fprintf(stderr, "Error while allocating memory processing block\n");
-            exit(EXIT_FAILURE);
-        }
-
+        temp_alloc += unknowns * unknowns;
         for (uint32_t i = 0; i < unknowns; i++) {
             B[i] = temp_alloc + i * block->word_size;
             memcpy(B[i], block->message + (block->block_size + i) * block->word_size, block->word_size);
@@ -183,13 +169,8 @@ void process_block(block_t *block, uint8_t **coeffs) {
                 memcpy(block->message + i*block->word_size, B[temp++], block->word_size);
             }
         }
-
-        free(A[0]);
-        free(B[0]);
         free(A);
-        free(B);
     }
-    free(unknowns_indexes);
 }
 
 
@@ -267,11 +248,12 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
 
     
+    bool *unknowns_indexes = malloc(file_info.block_size);
 
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
         prepare_block(&blocks[i], file_info.block_size, file_info.block_size, file_info.word_size, file_info.redudancy);
         make_block(binary_data, &blocks[i], i);
-        process_block(&blocks[i], coeffs);
+        process_block(&blocks[i], coeffs, unknowns_indexes);
     }
 
     uint32_t remaining = ( (file_info.file_size - 24 - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
@@ -279,8 +261,10 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     if (uncomplete_block) {
         prepare_block(&blocks[nb_blocks-1], remaining, file_info.block_size, file_info.word_size, file_info.redudancy);
         make_block(binary_data, &blocks[nb_blocks-1], nb_blocks-1);
-        process_block(&blocks[nb_blocks-1], coeffs);
+        process_block(&blocks[nb_blocks-1], coeffs, unknowns_indexes);
     }
+
+    free(unknowns_indexes);
 
     output_infos->file_data = file_data;
     output_infos->file_size = file_info.file_size;
