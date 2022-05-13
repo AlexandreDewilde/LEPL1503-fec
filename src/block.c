@@ -28,7 +28,6 @@ int64_t get_file_size(FILE *file) {
     return byte_size;
 }
 
-
 void get_file_info(FILE *file, file_info_t *file_info) {
 
     file_info->file_size =  get_file_size(file) - 24;
@@ -49,6 +48,23 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     file_info->redudancy = be32toh(buffer[3]);
 
     file_info->message_size = be64toh(*((uint64_t*) (buffer + 4)));
+
+    DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
+}
+
+
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info) {
+
+
+    file_info->seed = be32toh(*((uint32_t*)buffer));
+
+    file_info->block_size = be32toh(*((uint32_t*) (buffer + sizeof(uint32_t))));
+
+    file_info->word_size = be32toh(*((uint32_t*) (buffer + sizeof(uint32_t) * 2)));
+
+    file_info->redudancy = be32toh(*((uint32_t*) (buffer + sizeof(uint32_t) * 3)));
+
+    file_info->message_size = be64toh(*((uint64_t*) (buffer + 4 * sizeof(uint32_t))));
 
     DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
 }
@@ -194,7 +210,11 @@ void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_
         memcpy(current, blocks[i].message, to_read);
         current += to_read;
     }
-    fwrite(message, message_size, 1, output);
+    size_t written = fwrite(message, message_size, 1, output);
+    if (written != 1) {
+        fprintf(stderr, "Error writing block to output\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
 
@@ -215,13 +235,28 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     }
 
     file_info_t file_info;
-    get_file_info(file_thread->file, &file_info);
+    file_info.file_size =  get_file_size(file_thread->file);
+
+    uint8_t *file_data = malloc(file_info.file_size);
+    if (file_data == NULL) {
+        fprintf(stderr, "Error allocating memory for file\n");
+        exit(EXIT_FAILURE);
+    }
+    uint8_t *binary_data = file_data + 24;
+
+    size_t readed = fread(file_data, 1, file_info.file_size, file_thread->file);
+    if (readed != file_info.file_size) {
+        fprintf(stderr, "Error reading file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    get_file_info_from_buffer(file_data, &file_info);
     
     uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.redudancy);
     verbose_matrix(coeffs, file_info.redudancy, file_info.block_size);
     
     uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
-    uint64_t nb_blocks = math_ceil(file_info.file_size / (double) step);
+    uint64_t nb_blocks = math_ceil((file_info.file_size - 24) / (double) step);
 
     block_t *blocks = malloc(nb_blocks*sizeof(block_t));
     if (blocks == NULL) {
@@ -231,34 +266,27 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
 
     bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
 
-    uint8_t *file_data = malloc(file_info.file_size);
+    
 
-    if (file_data == NULL) {
-        fprintf(stderr, "Error allocating memory for file\n");
-        exit(EXIT_FAILURE);
-    }
-
-    fread(file_data, file_info.file_size, 1, file_thread->file);
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
         prepare_block(&blocks[i], file_info.block_size, file_info.block_size, file_info.word_size, file_info.redudancy);
-        make_block(file_data, &blocks[i], i);
+        make_block(binary_data, &blocks[i], i);
         process_block(&blocks[i], coeffs);
     }
 
-    uint32_t remaining = ( (file_info.file_size - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
-    uint32_t padding = (file_info.block_size * file_info.word_size * (nb_blocks - 1)) + remaining * file_info.word_size - file_info.message_size;
+    uint32_t remaining = ( (file_info.file_size - 24 - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
     
     if (uncomplete_block) {
         prepare_block(&blocks[nb_blocks-1], remaining, file_info.block_size, file_info.word_size, file_info.redudancy);
-        make_block(file_data, &blocks[nb_blocks-1], nb_blocks-1);
+        make_block(binary_data, &blocks[nb_blocks-1], nb_blocks-1);
         process_block(&blocks[nb_blocks-1], coeffs);
     }
 
     output_infos->file_data = file_data;
+    output_infos->file_size = file_info.file_size;
     output_infos->message_size = file_info.message_size;
     output_infos->blocks = blocks;
     output_infos->nb_blocks = nb_blocks;
-    output_infos->padding = padding;
     output_infos->remaining = remaining;
     output_infos->uncomplete_block = uncomplete_block;
     output_infos->filename = file_thread->filename;

@@ -31,17 +31,19 @@ typedef struct {
 typedef struct {
     uint8_t *file_data;
     char *filename;
+    uint64_t file_size;
     uint64_t message_size;
     block_t *blocks;
     uint64_t nb_blocks;
     uint32_t remaining;
-    uint32_t padding;
     bool uncomplete_block;
 
 } output_infos_t;
 
 
 void get_file_info(FILE *file, file_info_t *file_info);
+
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
 
 void prepare_block(block_t *block, uint32_t block_size, uint32_t global_block_size, uint32_t word_size, uint32_t redudancy);
 

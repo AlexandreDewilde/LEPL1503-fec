@@ -1,5 +1,5 @@
 #include "../headers/program.h"
-#define buffer_size 8
+#define buffer_size 10
 
 
 
@@ -22,6 +22,16 @@ output_infos_t buffer_writer[buffer_size];
 int skipped_buffer = 0;
 
 args_t args;
+
+void sem_error(char *function_name) {
+    fprintf(stderr, "Error with semaphore functions %s :  %s\n", function_name, strerror(errno));
+    exit(EXIT_FAILURE);
+}
+
+void mutex_error() {
+    fprintf(stderr, "Error with mutex (un)lock / init / destroy function, %s", strerror(errno));
+    exit(EXIT_FAILURE);
+}
 
 
 void folder_producer() {
@@ -68,12 +78,12 @@ void folder_producer() {
         strcpy(current_file_thread.filename, directory_entry->d_name);
 
 
-        sem_wait(empty);
-        pthread_mutex_lock(&mutex);
+        if (sem_wait(empty) != 0) sem_error("sem_wait");
+        if(pthread_mutex_lock(&mutex) != 0) mutex_error();
         buffer[in] = current_file_thread;
         in = (in + 1) % buffer_size;
-        pthread_mutex_unlock(&mutex);
-        sem_post(full);
+        if (pthread_mutex_unlock(&mutex) != 0) mutex_error();
+        if (sem_post(full) != 0) sem_error("sem_post");
         
     }
 
@@ -82,13 +92,13 @@ void folder_producer() {
     
     for (int i = 0; i < args.nb_threads; i++) {
 
-        sem_wait(empty);
-        pthread_mutex_lock(&mutex);
+        if (sem_wait(empty) != 0) sem_error("sem_wait");
+        if (pthread_mutex_lock(&mutex) != 0) mutex_error();;
         
         buffer[in] = current_file_thread;
         in = (in + 1) % buffer_size;
-        pthread_mutex_unlock(&mutex);
-        sem_post(full); 
+        if (pthread_mutex_unlock(&mutex) != 0) mutex_error();
+        if (sem_post(full) != 0) sem_error("sem_post"); 
     }
 
     
@@ -118,26 +128,26 @@ file_read_error:
 void producer() {
     while (true) {
        
-        sem_wait(full);
-        pthread_mutex_lock(&mutex);
+        if (sem_wait(full) != 0) sem_error("sem_wait");
+        if (pthread_mutex_lock(&mutex) != 0) mutex_error();
         file_thread_t current_file_thread = buffer[out];
         out = (out + 1) % buffer_size;
-        pthread_mutex_unlock(&mutex);
-        sem_post(empty);
+        if (pthread_mutex_unlock(&mutex) != 0) mutex_error();
+        if (sem_post(empty) != 0) sem_error("sem_post");
 
         output_infos_t current_output_info;
-        parse_file(&current_output_info, &current_file_thread);
 
+        parse_file(&current_output_info, &current_file_thread);
         
 
-        sem_wait(empty_writer);
-        pthread_mutex_lock(&mutex_writer);
+        if (sem_wait(empty_writer) != 0) sem_error("sem_wait");
+        if (pthread_mutex_lock(&mutex_writer) != 0) mutex_error();
         buffer_writer[in_writer] = current_output_info;
         in_writer = (in_writer + 1) % buffer_size;
-        pthread_mutex_unlock(&mutex_writer);
-        sem_post(full_writer);
+        if (pthread_mutex_unlock(&mutex_writer) != 0) mutex_error();
+        if (sem_post(full_writer) != 0) sem_error("sem_post");
         
-        if (!current_file_thread.file) {
+        if (!current_file_thread.filename) {
             break;
         }
         // Close this instance file
@@ -148,12 +158,12 @@ void producer() {
 void consumer() {
     while (true) {
 
-        sem_wait(full_writer);
-        pthread_mutex_lock(&mutex_writer);
+        if (sem_wait(full_writer) != 0) sem_error("sem_wait");
+        if (pthread_mutex_lock(&mutex_writer) != 0) mutex_error();
         output_infos_t current_file_info = buffer_writer[out_writer];
         out_writer = (out_writer + 1) % buffer_size;
-        pthread_mutex_unlock(&mutex_writer);
-        sem_post(empty_writer);
+        if (pthread_mutex_unlock(&mutex_writer) != 0) mutex_error();
+        if (sem_post(empty_writer) != 0) sem_error("sem_post");
 
         if (!current_file_info.filename) {
             skipped_buffer++;
@@ -182,8 +192,8 @@ int program(int argc, char *argv[]) {
     DEBUG("\tverbose mode: %s\n", args.verbose ? "enabled" : "disabled");
 
 
-    pthread_mutex_init(&mutex, NULL);
-    pthread_mutex_init(&mutex_writer, NULL);
+    if (pthread_mutex_init(&mutex, NULL) != 0) mutex_error();
+    if (pthread_mutex_init(&mutex_writer, NULL) != 0) mutex_error();
     empty = sem_init(buffer_size);
     empty_writer = sem_init(buffer_size);
     full = sem_init(0);
@@ -192,23 +202,46 @@ int program(int argc, char *argv[]) {
     pthread_t folder_thread;
     pthread_t prod[args.nb_threads];
     pthread_t cons;
-    pthread_create(&folder_thread, NULL, (void *) folder_producer, NULL);
-    for (int i = 0; i < args.nb_threads;i++)
-        pthread_create(&prod[i], NULL, (void *) producer, NULL);
-    pthread_create(&cons, NULL, (void *) consumer, NULL);
+
+    int error;
+    if ((error = pthread_create(&folder_thread, NULL, (void *) folder_producer, NULL)) != 0) {
+        fprintf(stderr, "Failed to create folder producer thread, error code : %d\n", error);
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < args.nb_threads;i++) {
+        if((error = pthread_create(&prod[i], NULL, (void *) producer, NULL)) != 0) {
+            fprintf(stderr, "Failed to create producer thread number : %d, error code : %d", i, err);
+            exit(EXIT_FAILURE);
+        }
+    }
+    if ((err = pthread_create(&cons, NULL, (void *) consumer, NULL)) != 0) {
+        fprintf(stderr, "Failed to create consumer thread, error code : %d\n", err);
+        exit(EXIT_FAILURE);
+    };
 
 
-    pthread_join(folder_thread, NULL);
-    for (int i = 0; i < args.nb_threads; i++)
-        pthread_join(prod[i], NULL);
-    pthread_join(cons, NULL);
+    if ((err = pthread_join(folder_thread, NULL)) != 0) {
+        fprintf(stderr, "Failed to join folder producer thread, error code %d\n", err);
+        exit(EXIT_FAILURE);
+    }
+    for (int i = 0; i < args.nb_threads; i++) {
+        if ((err = pthread_join(prod[i], NULL)) != 0) {
+            fprintf(stderr, "Failed to join thread producer, number : %d, error code : %d", i, err);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if ((err = pthread_join(cons, NULL)) != 0) {
+        fprintf(stderr, "Failed to join consumer thread, error code : %d\n", err);
+        exit(EXIT_FAILURE);
+    }
 
     sem_destroy(empty_writer);
     sem_destroy(empty);
     sem_destroy(full);
     sem_destroy(full_writer);
-    pthread_mutex_destroy(&mutex);
-    pthread_mutex_destroy(&mutex_writer);
+    if (pthread_mutex_destroy(&mutex) != 0) mutex_error();
+    if (pthread_mutex_destroy(&mutex_writer)) mutex_error();
 
     if (args.output_stream != stdout)
     {
