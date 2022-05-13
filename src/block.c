@@ -69,18 +69,25 @@ void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info) {
     DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
 }
 
-void make_block(uint8_t *file_data, block_t *block, uint64_t file_position) {
-    block->message = file_data + file_position;
+
+void prepare_block(block_t *block, uint32_t block_size, uint32_t global_block_size, uint32_t word_size, uint32_t redudancy) {
+    block->global_block_size = global_block_size;
+    block->block_size = block_size;
+    block->word_size = word_size;
+    block->redudancy = redudancy;
 }
 
-uint32_t find_lost_words(block_t *block, bool *unknown_indexes, uint32_t word_size) {
+void make_block(uint8_t *file_data, block_t *block, uint64_t block_id) {
+    block->message = file_data + (block->global_block_size + block->redudancy) * block->word_size * block_id;
+}
+
+uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     uint32_t unknowns = 0;
 
     for (uint32_t i = 0; i < block->block_size;i++) {
         uint32_t count = 0;
-        for (uint32_t j = 0; j < word_size;j++) {
-            count += block->message[i*word_size + j];
-            if (count) break;
+        for (uint32_t j = 0; j < block->word_size;j++) {
+            count += block->message[i*block->word_size + j];
         }
         // If count == 0 then all bytes equal 0 then we assume it's a lost word
         if (!count) {
@@ -95,9 +102,9 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes, uint32_t word_si
     return unknowns;
 }
 
-void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknown, uint32_t word_size, block_t *block, uint8_t **coeffs) {
+void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs) {
 
-    uint8_t *b_sub_line = malloc(word_size);
+    uint8_t *b_sub_line = malloc(block->word_size);
 
     if (!b_sub_line) {
         printf("Error to allocate memory for linear system");
@@ -112,8 +119,8 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
             }
             else {
                 // In case the word is not lost we have to substract to solve the system without it 
-                gf_256_mul_vector_buffer(b_sub_line, block->message + j*word_size, coeffs[i][j], word_size);
-                inplace_gf_256_full_add_vector(B[i], b_sub_line, word_size);           
+                gf_256_mul_vector_buffer(b_sub_line, block->message + j*block->word_size, coeffs[i][j], block->word_size);
+                inplace_gf_256_full_add_vector(B[i], b_sub_line, block->word_size);           
             } 
         }
     }
@@ -123,18 +130,18 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
     DEBUG("Size :%d\n", unknown);
 }
 
-void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uint32_t word_size) {
+void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes) {
    
     if (unknowns_indexes == NULL) {
         fprintf(stderr, "Failed to allocated unknown indexes vector\n");
         exit(EXIT_FAILURE);
     }
 
-    uint32_t unknowns = find_lost_words(block, unknowns_indexes, word_size);
+    uint32_t unknowns = find_lost_words(block, unknowns_indexes);
 
     // If there is no unknown, those ops are useless
     if (unknowns) {
-        uint8_t **A = malloc(2 * unknowns * sizeof(uint8_t*) + unknowns * unknowns + unknowns * word_size);
+        uint8_t **A = malloc(2 * unknowns * sizeof(uint8_t*) + unknowns * unknowns + unknowns * block->word_size);
         if (A == NULL) {
             fprintf(stderr, "Error while allocating memory processing block\n");
             exit(EXIT_FAILURE);
@@ -149,35 +156,54 @@ void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uin
         
         temp_alloc += unknowns * unknowns;
         for (uint32_t i = 0; i < unknowns; i++) {
-            B[i] = temp_alloc + i * word_size;
-            memcpy(B[i], block->message + (block->block_size + i) * word_size, word_size);
+            B[i] = temp_alloc + i * block->word_size;
+            memcpy(B[i], block->message + (block->block_size + i) * block->word_size, block->word_size);
         }
 
-        make_linear_system(A, B, unknowns_indexes, unknowns, word_size, block, coeffs);
-        gf_256_gaussian_elimination(A, B, word_size, unknowns);
+        make_linear_system(A, B, unknowns_indexes, unknowns, block, coeffs);
+        gf_256_gaussian_elimination(A, B, block->word_size, unknowns);
 
         uint32_t temp = 0;
         for (uint32_t i = 0; i < block->block_size; i++) {
             if (unknowns_indexes[i]) {
-                memcpy(block->message + i*word_size, B[temp++], word_size);
+                memcpy(block->message + i*block->word_size, B[temp++], block->word_size);
             }
         }
         free(A);
     }
 }
 
-void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint32_t word_size, uint64_t message_size, FILE *output) {
+
+void write_block(block_t *block, FILE *output) {
+    size_t written = fwrite(block->message, block->word_size, block->block_size, output);
+    if (written != block->block_size) {
+        fprintf(stderr, "Error writing to output\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_t message_size, FILE *output) {
     if (!nb_blocks) return;
-    uint8_t *current = message + blocks[0].block_size * word_size;
+    uint8_t *current = message + blocks[0].block_size * blocks[0].word_size;
     
     for (uint32_t i = 1; i < nb_blocks; i++) {
-        uint32_t to_read = blocks[i].block_size * word_size;
+        uint32_t to_read = blocks[i].block_size*blocks[i].word_size;
         memcpy(current, blocks[i].message, to_read);
         current += to_read;
     }
     size_t written = fwrite(message, message_size, 1, output);
     if (written != 1) {
         fprintf(stderr, "Error writing block to output\n");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding) {
+
+    size_t written = fwrite(block->message, block->word_size * remaining - padding, 1, output);
+    if (written != 1) {
+        fprintf(stderr, "Error writing to output\n");
         exit(EXIT_FAILURE);
     }
 }
@@ -225,19 +251,17 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     bool *unknowns_indexes = malloc(file_info.block_size);
 
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
-        blocks[i].block_size = file_info.block_size;
-
-        blocks[i].message = binary_data + (file_info.block_size + file_info.redudancy) * file_info.word_size * i;
-        process_block(&blocks[i], coeffs, unknowns_indexes, file_info.word_size);
+        prepare_block(&blocks[i], file_info.block_size, file_info.block_size, file_info.word_size, file_info.redudancy);
+        make_block(binary_data, &blocks[i], i);
+        process_block(&blocks[i], coeffs, unknowns_indexes);
     }
 
     uint32_t remaining = ( (file_info.file_size - 24 - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
     
     if (uncomplete_block) {
-        blocks[nb_blocks-1].block_size = remaining;
-
-        blocks[nb_blocks-1].message = binary_data + (file_info.block_size + file_info.redudancy) * file_info.word_size * (nb_blocks - 1);
-        process_block(&blocks[nb_blocks-1], coeffs, unknowns_indexes, file_info.word_size);
+        prepare_block(&blocks[nb_blocks-1], remaining, file_info.block_size, file_info.word_size, file_info.redudancy);
+        make_block(binary_data, &blocks[nb_blocks-1], nb_blocks-1);
+        process_block(&blocks[nb_blocks-1], coeffs, unknowns_indexes);
     }
 
     free(unknowns_indexes);
@@ -245,7 +269,6 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     output_infos->file_data = file_data;
     output_infos->file_size = file_info.file_size;
     output_infos->message_size = file_info.message_size;
-    output_infos->word_size = file_info.word_size;
     output_infos->blocks = blocks;
     output_infos->nb_blocks = nb_blocks;
     output_infos->remaining = remaining;
@@ -258,22 +281,26 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
 
 
 void write_to_file(output_infos_t *output_infos, FILE *output_stream) {
-    uint8_t array[sizeof(uint32_t) * 3 + strlen(output_infos->filename)];
-
     uint32_t filename_length = htobe32(strlen(output_infos->filename));
+    size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, output_stream);
+    if (written != 1) {
+        fprintf(stderr, "Error writing to output the length of filename");
+        exit(EXIT_FAILURE);
+    }
+
     uint64_t message_size_be = htobe64(output_infos->message_size);
-
-    memcpy(array, &filename_length, sizeof(uint32_t));
-    memcpy(array + sizeof(uint32_t), &message_size_be, sizeof(uint64_t));
-    memcpy(array + 3 * sizeof(uint32_t), output_infos->filename, strlen(output_infos->filename));
-
-    size_t written = fwrite(array, sizeof(array), 1, output_stream);
+    written = fwrite(&message_size_be, sizeof(uint64_t), 1, output_stream);
+    if (written != 1) {
+        fprintf(stderr, "Error writing to output the message size\n");
+        exit(EXIT_FAILURE);
+    }
+    written = fwrite(output_infos->filename, strlen(output_infos->filename), 1, output_stream);
     if (written != 1) {
         fprintf(stderr, "Error writing to output the filename\n");
         exit(EXIT_FAILURE);
     }
     if (output_infos->nb_blocks > 0) {
-        write_blocks(output_infos->blocks[0].message, output_infos->blocks, output_infos->nb_blocks, output_infos->word_size, output_infos->message_size, output_stream);
+        write_blocks(output_infos->blocks[0].message, output_infos->blocks, output_infos->nb_blocks, output_infos->message_size, output_stream);
     }
 
     free(output_infos->file_data);
