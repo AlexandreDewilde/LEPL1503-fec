@@ -6,7 +6,6 @@ int math_ceil(double nb) {
         return nb_int;
     }
     return nb_int + 1;
-
 }
 
 int64_t get_file_size(FILE *file) {
@@ -37,8 +36,7 @@ void get_file_info(FILE *file, file_info_t *file_info) {
     if (readed_chunks != 6) {
         deal_error_reading_file(file);
     }
-
-
+    
     file_info->seed = be32toh(buffer[0]);
 
     file_info->block_size = be32toh(buffer[1]);
