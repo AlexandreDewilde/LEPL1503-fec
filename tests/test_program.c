@@ -48,12 +48,12 @@ void test_multiple_file() {
         char *str = read_file_output(file, filename);
 
         uint32_t length_path = strlen(output_folder) + 7 + strlen(filename) + 1;
-        char *result_file = malloc(length_path);
+        char *result_file = malloc(length_path+1);
         sprintf(result_file, "%soutput_%s", output_folder, filename);
         result_file[length_path] = '\0';
         FILE *file2 = fopen(result_file, "rb");
 
-        char *filename2 = malloc(strlen(filename) + 1);
+        char *filename2 = malloc(strlen(filename) + 1 + 6);
         char *str2 = read_file_output(file2, filename2);
 
         CU_ASSERT_EQUAL(0, strcmp(str, str2));
