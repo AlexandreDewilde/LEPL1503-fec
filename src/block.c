@@ -69,18 +69,6 @@ void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info) {
     DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
 }
 
-
-void prepare_block(block_t *block, uint32_t block_size, uint32_t global_block_size, uint32_t word_size, uint32_t redudancy) {
-    block->global_block_size = global_block_size;
-    block->block_size = block_size;
-    block->word_size = word_size;
-    block->redudancy = redudancy;
-}
-
-void make_block(uint8_t *file_data, block_t *block, uint64_t block_id) {
-    block->message = file_data + (block->global_block_size + block->redudancy) * block->word_size * block_id;
-}
-
 uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     uint32_t unknowns = 0;
 
@@ -130,7 +118,7 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
     DEBUG("Size :%d\n", unknown);
 }
 
-void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes) {
+void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uint32_t redudancy) {
    
     if (unknowns_indexes == NULL) {
         fprintf(stderr, "Failed to allocated unknown indexes vector\n");
@@ -138,6 +126,11 @@ void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes) {
     }
 
     uint32_t unknowns = find_lost_words(block, unknowns_indexes);
+
+    if (unknowns > redudancy) {
+        fprintf(stderr, "Too much unknowns symbols\n");
+        return;
+    }
 
     // If there is no unknown, those ops are useless
     if (unknowns) {
@@ -173,15 +166,6 @@ void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes) {
     }
 }
 
-
-void write_block(block_t *block, FILE *output) {
-    size_t written = fwrite(block->message, block->word_size, block->block_size, output);
-    if (written != block->block_size) {
-        fprintf(stderr, "Error writing to output\n");
-        exit(EXIT_FAILURE);
-    }
-}
-
 void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_t message_size, FILE *output) {
     if (!nb_blocks) return;
     uint8_t *current = message + blocks[0].block_size * blocks[0].word_size;
@@ -198,15 +182,6 @@ void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_
     }
 }
 
-
-void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding) {
-
-    size_t written = fwrite(block->message, block->word_size * remaining - padding, 1, output);
-    if (written != 1) {
-        fprintf(stderr, "Error writing to output\n");
-        exit(EXIT_FAILURE);
-    }
-}
 
 
 void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
@@ -251,17 +226,19 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     bool *unknowns_indexes = malloc(file_info.block_size);
 
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
-        prepare_block(&blocks[i], file_info.block_size, file_info.block_size, file_info.word_size, file_info.redudancy);
-        make_block(binary_data, &blocks[i], i);
-        process_block(&blocks[i], coeffs, unknowns_indexes);
+        blocks[i].block_size = file_info.block_size;
+        blocks[i].word_size = file_info.word_size;
+        blocks[i].message = binary_data + (file_info.block_size + file_info.redudancy) * file_info.word_size * i;
+        process_block(&blocks[i], coeffs, unknowns_indexes, file_info.redudancy);
     }
 
     uint32_t remaining = ( (file_info.file_size - 24 - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
     
     if (uncomplete_block) {
-        prepare_block(&blocks[nb_blocks-1], remaining, file_info.block_size, file_info.word_size, file_info.redudancy);
-        make_block(binary_data, &blocks[nb_blocks-1], nb_blocks-1);
-        process_block(&blocks[nb_blocks-1], coeffs, unknowns_indexes);
+        blocks[nb_blocks-1].block_size = remaining;
+        blocks[nb_blocks-1].word_size = file_info.word_size;
+        blocks[nb_blocks-1].message = binary_data + (file_info.block_size + file_info.redudancy) * file_info.word_size * (nb_blocks-1);
+        process_block(&blocks[nb_blocks-1], coeffs, unknowns_indexes, file_info.redudancy);
     }
 
     free(unknowns_indexes);

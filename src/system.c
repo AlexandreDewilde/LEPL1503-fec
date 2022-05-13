@@ -67,11 +67,11 @@ void gf_256_gaussian_elimination_forward(uint8_t **A, uint8_t **b, uint32_t symb
             uint8_t factor = gf256_mul_table[A[i][k]][gf256_inv_table[A[k][k]]];
             
             for (uint32_t j = 0; j < system_size; j++) {
-                A[i][j] ^= gf256_mul_table[A[k][j]][factor];
+                A[i][j] ^= gf256_mul_table[factor][A[k][j]];
             }
 
             for (uint32_t j = 0; j < symbol_size; j++) {
-                b[i][j] ^= gf256_mul_table[b[k][j]][factor];
+                b[i][j] ^= gf256_mul_table[factor][b[k][j]];
             }  
         }
     }
