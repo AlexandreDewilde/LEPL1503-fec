@@ -23,6 +23,23 @@ typedef struct {
 
 } file_info_t;
 
+typedef struct {
+    char *filename;
+    FILE *file;
+} file_thread_t;
+
+typedef struct {
+    uint8_t *file_data;
+    char *filename;
+    uint64_t message_size;
+    block_t *blocks;
+    uint64_t nb_blocks;
+    uint32_t remaining;
+    uint32_t padding;
+    bool uncomplete_block;
+
+} output_infos_t;
+
 
 void get_file_info(FILE *file, file_info_t *file_info);
 
@@ -53,5 +70,9 @@ void write_block(block_t *block, FILE *output);
 void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding);
 
 void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_t message_size, FILE *output);
+
+void parse_file(output_infos_t *output_infos, file_thread_t *file_thread);
+
+void write_to_file(output_infos_t *output_infos, FILE *output_stream);
 
 #endif /* BLOCK_H */

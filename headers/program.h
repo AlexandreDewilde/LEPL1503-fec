@@ -19,22 +19,6 @@
 #include "portable_endian.h"
 #include "portable_semaphore.h"
 
-typedef struct {
-    char *filename;
-    FILE *file;
-} file_thread_t;
-
-typedef struct {
-    uint8_t *file_data;
-    char *filename;
-    uint64_t message_size;
-    block_t *blocks;
-    uint64_t nb_blocks;
-    uint32_t remaining;
-    uint32_t padding;
-    bool uncomplete_block;
-
-} output_infos_t;
 
 int program(int argc, char *argv[]);
 

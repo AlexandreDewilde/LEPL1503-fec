@@ -23,14 +23,6 @@ int skipped_buffer = 0;
 
 args_t args;
 
-int math_ceil(double nb) {
-    int nb_int = (int) nb;
-    if (nb == (double) nb_int) {
-        return nb_int;
-    }
-    return nb_int + 1;
-
-}
 
 void folder_producer() {
     struct dirent *directory_entry;
@@ -133,70 +125,10 @@ void producer() {
         pthread_mutex_unlock(&mutex);
         sem_post(empty);
 
-        if (!current_file_thread.filename) {
-            output_infos_t current_output_info;
-            memset(&current_output_info, 0, sizeof(current_output_info));
+        output_infos_t current_output_info;
+        parse_file(&current_output_info, &current_file_thread);
 
-            sem_wait(empty_writer);
-            pthread_mutex_lock(&mutex_writer);
-            buffer_writer[in_writer] = current_output_info;
-            in_writer = (in_writer + 1) % buffer_size;
-            pthread_mutex_unlock(&mutex_writer);
-            sem_post(full_writer);
-
-            break;
-        }
-
-        file_info_t file_info;
-        get_file_info(current_file_thread.file, &file_info);
         
-        uint8_t **coeffs = gen_coefs(file_info.seed, file_info.block_size, file_info.redudancy);
-        verbose_matrix(coeffs, file_info.redudancy, file_info.block_size);
-        
-        uint64_t step = file_info.word_size * (file_info.block_size + file_info.redudancy);
-        uint64_t nb_blocks = math_ceil(file_info.file_size / (double) step);
-
-        block_t *blocks = malloc(nb_blocks*sizeof(block_t));
-        if (blocks == NULL) {
-            fprintf(stderr, "Error allocating memory for block\n");
-            exit(EXIT_FAILURE);
-        }
-
-        bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
-
-        uint8_t *file_data = malloc(file_info.file_size);
-
-        if (file_data == NULL) {
-            fprintf(stderr, "Error allocating memory for file\n");
-            exit(EXIT_FAILURE);
-        }
-
-        fread(file_data, file_info.file_size, 1, current_file_thread.file);
-        for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
-            prepare_block(&blocks[i], file_info.block_size, file_info.block_size, file_info.word_size, file_info.redudancy);
-            make_block(file_data, &blocks[i], i);
-            process_block(&blocks[i], coeffs);
-        }
-
-        uint32_t remaining = ( (file_info.file_size - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
-        uint32_t padding = (file_info.block_size * file_info.word_size * (nb_blocks - 1)) + remaining * file_info.word_size - file_info.message_size;
-        
-        if (uncomplete_block) {
-            prepare_block(&blocks[nb_blocks-1], remaining, file_info.block_size, file_info.word_size, file_info.redudancy);
-            make_block(file_data, &blocks[nb_blocks-1], nb_blocks-1);
-            process_block(&blocks[nb_blocks-1], coeffs);
-        }
-
-        output_infos_t current_output_info = {
-            .file_data = file_data,
-            .message_size = file_info.message_size,
-            .blocks = blocks,
-            .nb_blocks = nb_blocks,
-            .padding = padding,
-            .remaining = remaining,
-            .uncomplete_block = uncomplete_block,
-            .filename = current_file_thread.filename
-        };
 
         sem_wait(empty_writer);
         pthread_mutex_lock(&mutex_writer);
@@ -204,8 +136,10 @@ void producer() {
         in_writer = (in_writer + 1) % buffer_size;
         pthread_mutex_unlock(&mutex_writer);
         sem_post(full_writer);
-        free(coeffs[0]);
-        free(coeffs);
+        
+        if (!current_file_thread.file) {
+            break;
+        }
         // Close this instance file
         fclose(current_file_thread.file);
     }
@@ -228,31 +162,7 @@ void consumer() {
         }
         
 
-        uint32_t filename_length = htobe32(strlen(current_file_info.filename));
-        size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, args.output_stream);
-        if (written != 1) {
-            fprintf(stderr, "Error writing to output the length of filename");
-            exit(EXIT_FAILURE);
-        }
-
-        uint64_t message_size_be = htobe64(current_file_info.message_size);
-        written = fwrite(&message_size_be, sizeof(uint64_t), 1, args.output_stream);
-        if (written != 1) {
-            fprintf(stderr, "Error writing to output the message size\n");
-            exit(EXIT_FAILURE);
-        }
-        written = fwrite(current_file_info.filename, strlen(current_file_info.filename), 1, args.output_stream);
-        if (written != 1) {
-            fprintf(stderr, "Error writing to output the filename\n");
-            exit(EXIT_FAILURE);
-        }
-        if (current_file_info.nb_blocks > 0) {
-            write_blocks(current_file_info.blocks[0].message, current_file_info.blocks, current_file_info.nb_blocks, current_file_info.message_size, args.output_stream);
-        }
-
-        free(current_file_info.file_data);
-        free(current_file_info.blocks);
-        free(current_file_info.filename);
+        write_to_file(&current_file_info, args.output_stream);
     }
 }
 
