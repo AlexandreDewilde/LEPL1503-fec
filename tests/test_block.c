@@ -53,13 +53,13 @@ void test_find_lost_words(){
 
     block_t *block1 = malloc(sizeof(block_t));
     block1->block_size = 3;
-    block1->word_size = 3;
-    block1->message = malloc(block1->block_size * block1->word_size);
-    for (uint32_t i = 0; i < block1->word_size* block1->block_size; i++) block1->message[i] = 0; 
+    uint32_t word_size = 3;
+    block1->message = malloc(block1->block_size * word_size);
+    for (uint32_t i = 0; i < word_size* block1->block_size; i++) block1->message[i] = 0; 
 
     bool unknown_indexes[block1->block_size];
     
-    CU_ASSERT_EQUAL(find_lost_words(block1, unknown_indexes), 3);
+    CU_ASSERT_EQUAL(find_lost_words(block1, unknown_indexes, word_size), 3);
 
     free(block1->message);
     fclose(file);
