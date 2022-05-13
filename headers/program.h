@@ -25,6 +25,7 @@ typedef struct {
 } file_thread_t;
 
 typedef struct {
+    uint8_t *file_data;
     char *filename;
     uint64_t message_size;
     block_t *blocks;

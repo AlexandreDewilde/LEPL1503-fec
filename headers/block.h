@@ -13,9 +13,8 @@
 
 
 typedef struct {
-    uint32_t block_size, word_size, redudancy;
-    uint8_t **message;
-    uint8_t **redudant_symbols;
+    uint32_t global_block_size, block_size, word_size, redudancy;
+    uint8_t *message;
 } block_t;
 
 typedef struct {
@@ -27,11 +26,12 @@ typedef struct {
 
 void get_file_info(FILE *file, file_info_t *file_info);
 
-void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint32_t redudancy);
+void prepare_block(block_t *block, uint32_t block_size, uint32_t global_block_size, uint32_t word_size, uint32_t redudancy);
 
-void make_block(FILE *file, block_t *block);
+void make_block(uint8_t *file_data, block_t *block, uint64_t block_id);
 
 void free_blocks(block_t *blocks, uint32_t nb_blocks);
+
 
 uint32_t find_lost_words(block_t *block, bool *unknown_indexes);
 
@@ -51,5 +51,7 @@ void process_block(block_t *block, uint8_t **coeffs);
 void write_block(block_t *block, FILE *output);
 
 void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding);
+
+void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_t message_size, FILE *output);
 
 #endif /* BLOCK_H */

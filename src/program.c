@@ -164,27 +164,31 @@ void producer() {
 
         bool uncomplete_block = file_info.message_size != nb_blocks * file_info.block_size * file_info.word_size; 
 
+        uint8_t *file_data = malloc(file_info.file_size);
+
+        if (file_data == NULL) {
+            fprintf(stderr, "Error allocating memory for file\n");
+            exit(EXIT_FAILURE);
+        }
+
+        fread(file_data, file_info.file_size, 1, current_file_thread.file);
         for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
-            prepare_block(&blocks[i], file_info.block_size, file_info.word_size, file_info.redudancy);
-            make_block(current_file_thread.file, &blocks[i]);
+            prepare_block(&blocks[i], file_info.block_size, file_info.block_size, file_info.word_size, file_info.redudancy);
+            make_block(file_data, &blocks[i], i);
             process_block(&blocks[i], coeffs);
         }
 
-        int64_t current_pos = ftell(current_file_thread.file);
-        if (current_pos == -1) {
-            fprintf(stderr, "Error with ftell : %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        uint32_t remaining = ( (file_info.file_size + 24 - current_pos) / file_info.word_size) - file_info.redudancy;
+        uint32_t remaining = ( (file_info.file_size - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
         uint32_t padding = (file_info.block_size * file_info.word_size * (nb_blocks - 1)) + remaining * file_info.word_size - file_info.message_size;
         
         if (uncomplete_block) {
-            prepare_block(&blocks[nb_blocks-1], remaining, file_info.word_size, file_info.redudancy);
-            make_block(current_file_thread.file, &blocks[nb_blocks-1]);
+            prepare_block(&blocks[nb_blocks-1], remaining, file_info.block_size, file_info.word_size, file_info.redudancy);
+            make_block(file_data, &blocks[nb_blocks-1], nb_blocks-1);
             process_block(&blocks[nb_blocks-1], coeffs);
         }
 
         output_infos_t current_output_info = {
+            .file_data = file_data,
             .message_size = file_info.message_size,
             .blocks = blocks,
             .nb_blocks = nb_blocks,
@@ -231,8 +235,8 @@ void consumer() {
             exit(EXIT_FAILURE);
         }
 
-        current_file_info.message_size = htobe64(current_file_info.message_size);
-        written = fwrite(&current_file_info.message_size, sizeof(uint64_t), 1, args.output_stream);
+        uint64_t message_size_be = htobe64(current_file_info.message_size);
+        written = fwrite(&message_size_be, sizeof(uint64_t), 1, args.output_stream);
         if (written != 1) {
             fprintf(stderr, "Error writing to output the message size\n");
             exit(EXIT_FAILURE);
@@ -242,15 +246,12 @@ void consumer() {
             fprintf(stderr, "Error writing to output the filename\n");
             exit(EXIT_FAILURE);
         }
-        for (uint64_t i = 0; i < current_file_info.nb_blocks - current_file_info.uncomplete_block; i++) {
-            write_block(&current_file_info.blocks[i], args.output_stream);
+        if (current_file_info.nb_blocks > 0) {
+            write_blocks(current_file_info.blocks[0].message, current_file_info.blocks, current_file_info.nb_blocks, current_file_info.message_size, args.output_stream);
         }
-        
-        if (current_file_info.uncomplete_block) {
-            write_last_block(&current_file_info.blocks[current_file_info.nb_blocks-1], args.output_stream, current_file_info.remaining, current_file_info.padding);
-        }
-        
-        free_blocks(current_file_info.blocks, current_file_info.nb_blocks);
+
+        free(current_file_info.file_data);
+        free(current_file_info.blocks);
         free(current_file_info.filename);
     }
 }
