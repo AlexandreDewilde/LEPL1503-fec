@@ -8,43 +8,43 @@
 
 void test_get_file_info(){
     FILE *file;
-    file_info_t *info= malloc(sizeof(file_info_t));
+    file_info_t *file_info= malloc(sizeof(file_info_t));
     
     file = fopen("samples/africa.bin","rb");
-    get_file_info(file,info);
+    get_file_info(file,file_info);
 
-    CU_ASSERT_EQUAL(info->seed,1);
-    CU_ASSERT_EQUAL(info->block_size,50);
-    CU_ASSERT_EQUAL(info->word_size,100);
-    CU_ASSERT_EQUAL(info->redudancy,20);
-    CU_ASSERT_EQUAL(info->message_size,22832);
+    CU_ASSERT_EQUAL(file_info->seed,1);
+    CU_ASSERT_EQUAL(file_info->block_size,50);
+    CU_ASSERT_EQUAL(file_info->word_size,100);
+    CU_ASSERT_EQUAL(file_info->redudancy,20);
+    CU_ASSERT_EQUAL(file_info->message_size,22832);
 
 
     file  = fopen("samples/big.bin","rb");
-    get_file_info(file,info);
-    CU_ASSERT_EQUAL(info->seed,1);
-    CU_ASSERT_EQUAL(info->block_size,50);
-    CU_ASSERT_EQUAL(info->word_size,1000);
-    CU_ASSERT_EQUAL(info->redudancy,20);
-    CU_ASSERT_EQUAL(info->message_size,52955);
+    get_file_info(file,file_info);
+    CU_ASSERT_EQUAL(file_info->seed,1);
+    CU_ASSERT_EQUAL(file_info->block_size,50);
+    CU_ASSERT_EQUAL(file_info->word_size,1000);
+    CU_ASSERT_EQUAL(file_info->redudancy,20);
+    CU_ASSERT_EQUAL(file_info->message_size,52955);
 
     file  = fopen("samples/medium.bin","rb");
-    get_file_info(file,info);
-    CU_ASSERT_EQUAL(info->seed,12345);
-    CU_ASSERT_EQUAL(info->block_size,10);
-    CU_ASSERT_EQUAL(info->word_size,20);
-    CU_ASSERT_EQUAL(info->redudancy,2);
-    CU_ASSERT_EQUAL(info->message_size,783);
+    get_file_info(file,file_info);
+    CU_ASSERT_EQUAL(file_info->seed,12345);
+    CU_ASSERT_EQUAL(file_info->block_size,10);
+    CU_ASSERT_EQUAL(file_info->word_size,20);
+    CU_ASSERT_EQUAL(file_info->redudancy,2);
+    CU_ASSERT_EQUAL(file_info->message_size,783);
 
     file  = fopen("samples/small.bin","rb");
-    get_file_info(file,info);
-    CU_ASSERT_EQUAL(info->seed,42);
-    CU_ASSERT_EQUAL(info->block_size,3);
-    CU_ASSERT_EQUAL(info->word_size,3);
-    CU_ASSERT_EQUAL(info->redudancy,4);
-    CU_ASSERT_EQUAL(info->message_size,23);
+    get_file_info(file,file_info);
+    CU_ASSERT_EQUAL(file_info->seed,42);
+    CU_ASSERT_EQUAL(file_info->block_size,3);
+    CU_ASSERT_EQUAL(file_info->word_size,3);
+    CU_ASSERT_EQUAL(file_info->redudancy,4);
+    CU_ASSERT_EQUAL(file_info->message_size,23);
 
-    free(info);
+    free(file_info);
 }
 
 
@@ -72,18 +72,12 @@ void test_find_lost_words(){
 void test_get_file_info_from_buffer(){
 
     FILE *file;
-    file = fopen("samples/africa.bin","rb");
-
     file_info_t *file_info = malloc(sizeof(file_info_t));
-
-    get_file_info(file,file_info);
-
     file_info->file_size = 24;
-
     uint8_t *buffer = malloc(file_info->file_size);
 
+    file = fopen("samples/africa.bin","rb");
     fread(buffer, 1, file_info->file_size, file);
-    
     get_file_info_from_buffer(buffer,file_info);
 
     CU_ASSERT_EQUAL(file_info->seed,1);
@@ -92,6 +86,55 @@ void test_get_file_info_from_buffer(){
     CU_ASSERT_EQUAL(file_info->redudancy,20);
     CU_ASSERT_EQUAL(file_info->message_size,22832);
 
+
+
+
+    file = fopen("samples/africa.bin","rb");
+    fread(buffer, 1, file_info->file_size, file);
+    get_file_info_from_buffer(buffer,file_info);
+
+
+    CU_ASSERT_EQUAL(file_info->seed,1);
+    CU_ASSERT_EQUAL(file_info->block_size,50);
+    CU_ASSERT_EQUAL(file_info->word_size,100);
+    CU_ASSERT_EQUAL(file_info->redudancy,20);
+    CU_ASSERT_EQUAL(file_info->message_size,22832);
+
+
+    file  = fopen("samples/big.bin","rb");
+    fread(buffer, 1, file_info->file_size, file);
+    get_file_info_from_buffer(buffer,file_info);
+
+    CU_ASSERT_EQUAL(file_info->seed,1);
+    CU_ASSERT_EQUAL(file_info->block_size,50);
+    CU_ASSERT_EQUAL(file_info->word_size,1000);
+    CU_ASSERT_EQUAL(file_info->redudancy,20);
+    CU_ASSERT_EQUAL(file_info->message_size,52955);
+
+    file  = fopen("samples/medium.bin","rb");
+    fread(buffer, 1, file_info->file_size, file);
+    get_file_info_from_buffer(buffer,file_info);
+   
+    CU_ASSERT_EQUAL(file_info->seed,12345);
+    CU_ASSERT_EQUAL(file_info->block_size,10);
+    CU_ASSERT_EQUAL(file_info->word_size,20);
+    CU_ASSERT_EQUAL(file_info->redudancy,2);
+    CU_ASSERT_EQUAL(file_info->message_size,783);
+
+    file  = fopen("samples/small.bin","rb");
+  
+    get_file_info_from_buffer(buffer,file_info);
+    fread(buffer, 1, file_info->file_size, file);
+    get_file_info_from_buffer(buffer,file_info);
+
+    CU_ASSERT_EQUAL(file_info->seed,42);
+    CU_ASSERT_EQUAL(file_info->block_size,3);
+    CU_ASSERT_EQUAL(file_info->word_size,3);
+    CU_ASSERT_EQUAL(file_info->redudancy,4);
+    CU_ASSERT_EQUAL(file_info->message_size,23);
+
+
+    fclose(file);
     free(file_info);
     free(buffer);
 
