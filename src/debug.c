@@ -11,8 +11,8 @@ static int SIGNAL = 0;
 */
 void DEBUG_start_time(struct timeval *start) {
     if (SIGNAL){
-        // From https://stackoverflow.com/questions/10192903/time-in-milliseconds-in-c
-        gettimeofday(start, NULL);
+    // From https://stackoverflow.com/questions/10192903/time-in-milliseconds-in-c
+    gettimeofday(start, NULL);
     }
 }
 
