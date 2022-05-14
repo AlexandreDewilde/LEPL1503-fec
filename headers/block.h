@@ -75,7 +75,7 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes);
  * @param block: the block that the linear system will be build from
  * @param coeffs: the coeffs to generate the A matrix of the linear system
  */
-void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs);
+void make_linear_system(uint8_t **A, uint8_t **B, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs);
 
 /**
  *
@@ -85,7 +85,7 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
  * @param redudancy: the block that the linear system will be build from
  * @param coeffs: the coeffs to generate that help us to solve the linear_ststem
  */
-void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uint32_t redudancy);
+void process_block(block_t *block, uint8_t **coeffs, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t redudancy);
 
 /**
  *
