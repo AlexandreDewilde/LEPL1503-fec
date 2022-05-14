@@ -11,8 +11,8 @@ static int SIGNAL = 0;
 */
 void DEBUG_start_time(struct timeval *start) {
     if (SIGNAL){
-    // From https://stackoverflow.com/questions/10192903/time-in-milliseconds-in-c
-    gettimeofday(start, NULL);
+        // From https://stackoverflow.com/questions/10192903/time-in-milliseconds-in-c
+        gettimeofday(start, NULL);
     }
 }
 
@@ -37,9 +37,9 @@ void DEBUG_end_time(struct timeval *end) {
 * @return: the difference between the starting time and the ending time
 */
 
-double DEBUG_get_delta_time(struct timeval *start, struct timeval *end) {
+double DEBUG_get_delta_time(struct timeval start, struct timeval end) {
     if (SIGNAL){
-        return (double) (end->tv_usec - start->tv_usec) / 1000000 + (double)(end->tv_sec - start->tv_sec);
+        return (double) (end.tv_usec - start.tv_usec) / 1000000 + (double)(end.tv_sec - start.tv_sec);
     }
     return 0;
 }
