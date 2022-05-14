@@ -115,7 +115,7 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
     }
     free(b_sub_line);  
 
-    verbose_linear_system(A, B, unknown, unknown);
+    verbose_linear_system(A, B, unknown, block->word_size);
     DEBUG("Size :%d\n", unknown);
 }
 
