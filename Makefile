@@ -21,7 +21,7 @@ clean:
 
 tests: $(PROGRAM_FILES) $(TEST_FILES) tests/tools.c tests/tests.c
 	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS)  -o tests_suite -g $^ -lcunit $(LIBS)
-	valgrind --leak-check=full ./tests_suite
+	./tests_suite
 	
 clean_tests:
 	rm -f tests_suite
