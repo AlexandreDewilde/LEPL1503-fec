@@ -177,6 +177,9 @@ void consumer() {
 }
 
 int program(int argc, char *argv[]) {
+    struct timeval *start = (struct timeval *) malloc(sizeof(struct timeval));
+    struct timeval *end = (struct timeval *) malloc(sizeof(struct timeval));
+    DEBUG_start_time(start);
     
     int err = parse_args(&args, argc, argv);
     if (err == -1)
@@ -243,9 +246,22 @@ int program(int argc, char *argv[]) {
     if (pthread_mutex_destroy(&mutex) != 0) mutex_error();
     if (pthread_mutex_destroy(&mutex_writer)) mutex_error();
 
+    
+
     if (args.output_stream != stdout)
     {
+        DEBUG_end_time(end);
+        double used_time = DEBUG_get_delta_time(start,end);
+        DEBUG_PRINT_TIME_USED(used_time);
+
         fclose(args.output_stream);
     }
+    DEBUG_end_time(end);
+    double used_time = DEBUG_get_delta_time(start,end);
+    DEBUG_PRINT_TIME_USED(used_time);
+    free(start);
+    free(end);
     return 0;
+
+    
 }
