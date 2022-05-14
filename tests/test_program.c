@@ -16,11 +16,11 @@ char* read_file_output(FILE* file, char* filename) {
 }
 
 void test_one_file() {
-    char *argv[] = {"./fec", "tests/samples/sample_one_file", "-f", "test.txt"};
+    char *argv[] = {"./fec", "tests/results/sample_one_file", "-f", "test.txt"};
     program(4, argv);
     
     FILE *file = fopen("test.txt", "rb");
-    FILE *file2 = fopen("tests/samples/output_africa.bin", "rb");
+    FILE *file2 = fopen("tests/results/output_africa.bin", "rb");
     char *filename = malloc(25);
     char *filename2 = malloc(25);
     char* str = read_file_output(file, filename);
@@ -35,9 +35,9 @@ void test_one_file() {
 }
 
 void test_multiple_file() {
-    char *argv[] = {"./fec", "samples", "-f", "test.txt"};
+    char *argv[] = {"./fec", "results", "-f", "test.txt"};
     program(4, argv);
-    char *output_folder = "tests/samples/";
+    char *output_folder = "tests/results/";
 
     FILE *file = fopen("test.txt", "rb");
     fseek(file, 0, SEEK_END);

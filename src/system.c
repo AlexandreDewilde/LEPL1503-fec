@@ -120,7 +120,7 @@ uint8_t **gen_coefs(uint32_t seed, uint32_t nss, uint32_t nrs) {
     tinymt32_init(&prng, seed);
 
     // make use of cache memory for perfomance
-    uint8_t **coefs = malloc(nrs * sizeof(uint8_t *) + nrs * nss);
+    uint8_t **coefs = (uint8_t **)  malloc(nrs * sizeof(uint8_t *) + nrs * nss);
     if (!coefs) {
         fprintf(stderr, "Failed to allocate memory for coefficients\n");
         exit(EXIT_FAILURE);
