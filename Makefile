@@ -27,7 +27,7 @@ clean_tests:
 	rm -f tests_suite
 
 speed_tests: $(PROGRAM_FILES) tests/tools.c tests/speed_tests/speed_tests.c
-	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o speed_tests $^ -Ofast
+	$(CC) $(INCLUDE_HEADERS_DIRECTORY) $(CFLAGS) -o speed_tests $^  $(LIBS) -Ofast
 	./speed_tests
 
 clean_speed_tests:

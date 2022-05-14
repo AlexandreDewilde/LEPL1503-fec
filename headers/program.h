@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <time.h>
+#include <pthread.h>
 #include "debug.h"
 #include "utils.h"
 #include "block.h"
