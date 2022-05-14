@@ -86,19 +86,23 @@ void test_get_file_info_from_buffer(){
     
     get_file_info_from_buffer(buffer,file_info);
 
-    CU_ASSERT_EQUAL(file_info->seed,be32toh(buffer[0]));
-    CU_ASSERT_EQUAL(file_info->block_size,be32toh(buffer[1]));
-    CU_ASSERT_EQUAL(file_info->word_size,be32toh(buffer[2]));
-    CU_ASSERT_EQUAL(file_info->redudancy,be32toh(buffer[3]));
-    CU_ASSERT_EQUAL(file_info->message_size,be32toh(buffer[4]));
+    CU_ASSERT_EQUAL(file_info->seed,1);
+    CU_ASSERT_EQUAL(file_info->block_size,50);
+    CU_ASSERT_EQUAL(file_info->word_size,100);
+    CU_ASSERT_EQUAL(file_info->redudancy,20);
+    CU_ASSERT_EQUAL(file_info->message_size,22832);
 
     free(file_info);
     free(buffer);
 
 }
 
+
+
+
+
+
 void test_prepare_block();
-void test_make_block();
 void test_free_blocks();
 void test_make_linear_system();
 void test_process_block();
