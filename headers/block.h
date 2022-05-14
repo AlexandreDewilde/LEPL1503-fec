@@ -53,4 +53,8 @@ void write_block(block_t *block, FILE *output);
 
 void write_last_block(block_t *block, FILE *output, uint32_t remaining, uint32_t padding);
 
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
+
+int64_t get_file_size(FILE *file);
+
 #endif /* BLOCK_H */

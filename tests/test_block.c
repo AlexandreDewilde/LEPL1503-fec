@@ -4,6 +4,8 @@
 
 
 
+
+
 void test_get_file_info(){
     FILE *file;
     file_info_t *info= malloc(sizeof(file_info_t));
@@ -64,6 +66,35 @@ void test_find_lost_words(){
     free(block1->message);
     fclose(file);
     free(block1);
+}
+
+
+void test_get_file_info_from_buffer(){
+
+    FILE *file;
+    file = fopen("samples/africa.bin","rb");
+
+    file_info_t *file_info = malloc(sizeof(file_info_t));
+
+    get_file_info(file,file_info);
+
+    file_info->file_size = 24;
+
+    uint8_t *buffer = malloc(file_info->file_size);
+
+    fread(buffer, 1, file_info->file_size, file);
+    
+    get_file_info_from_buffer(buffer,file_info);
+
+    CU_ASSERT_EQUAL(file_info->seed,be32toh(buffer[0]));
+    CU_ASSERT_EQUAL(file_info->block_size,be32toh(buffer[1]));
+    CU_ASSERT_EQUAL(file_info->word_size,be32toh(buffer[2]));
+    CU_ASSERT_EQUAL(file_info->redudancy,be32toh(buffer[3]));
+    CU_ASSERT_EQUAL(file_info->message_size,be32toh(buffer[4]));
+
+    free(file_info);
+    free(buffer);
+
 }
 
 void test_prepare_block();

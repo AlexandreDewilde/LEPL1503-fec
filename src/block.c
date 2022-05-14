@@ -20,41 +20,45 @@ void get_file_info(FILE *file, file_info_t *file_info) {
 
     file_info->file_size =  get_file_size(file) - 24;
 
+    uint32_t buffer[6];
+    size_t readed_chunks = fread(buffer, sizeof(uint32_t), 6, file);
+    if (readed_chunks != 6) {
+        deal_error_reading_file(file);
+    }
     
-    // Reads file header with all the information
-    size_t readed_chunks;
-    readed_chunks = fread(&(file_info->seed), sizeof(uint32_t), 1, file);
-    if (readed_chunks != 1) {
-        deal_error_reading_file(file);
-    }
-    file_info->seed = be32toh(file_info->seed);
+    file_info->seed = be32toh(buffer[0]);
 
-    readed_chunks = fread(&(file_info->block_size), sizeof(uint32_t), 1, file);
-    if (readed_chunks != 1) {
-        deal_error_reading_file(file);
-    }
-    file_info->block_size = be32toh(file_info->block_size);
+    file_info->block_size = be32toh(buffer[1]);
 
-    readed_chunks = fread(&(file_info->word_size), sizeof(uint32_t), 1, file);
-    if (readed_chunks != 1) {
-        deal_error_reading_file(file);
-    }
-    file_info->word_size = be32toh(file_info->word_size);
+    file_info->word_size = be32toh(buffer[2]);
 
-    readed_chunks = fread(&(file_info->redudancy), sizeof(uint32_t), 1, file);
-    if (readed_chunks != 1) {
-        deal_error_reading_file(file);
-    }
-    file_info->redudancy = be32toh(file_info->redudancy);
+    file_info->redudancy = be32toh(buffer[3]);
 
-    readed_chunks = fread(&(file_info->message_size), sizeof(uint64_t), 1, file);
-    if (readed_chunks != 1) {
-        deal_error_reading_file(file);
-    }
-    file_info->message_size = be64toh(file_info->message_size);
+    file_info->message_size = be64toh(*((uint64_t*) (buffer + 4)));
 
     DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
 }
+
+
+
+
+
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info) {
+
+
+    file_info->seed = be32toh(*((uint32_t*)buffer));
+
+    file_info->block_size = be32toh(*((uint32_t*) (buffer + sizeof(uint32_t))));
+
+    file_info->word_size = be32toh(*((uint32_t*) (buffer + sizeof(uint32_t) * 2)));
+
+    file_info->redudancy = be32toh(*((uint32_t*) (buffer + sizeof(uint32_t) * 3)));
+
+    file_info->message_size = be64toh(*((uint64_t*) (buffer + 4 * sizeof(uint32_t))));
+
+    DEBUG("Seed : %d, block_size : %d, word_size : %d, redundancy : %d\n", file_info->seed, file_info->block_size, file_info->word_size, file_info->redudancy);
+}
+
 
 
 void prepare_block(block_t *block, uint32_t block_size, uint32_t word_size, uint32_t redudancy) {

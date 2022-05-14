@@ -24,6 +24,7 @@ void generate_system_suite(CU_pSuite suite) {
 void generate_block_suite(CU_pSuite suite){
     CU_add_test(suite, "test_get_info", test_get_file_info);
     CU_add_test(suite, "get_lost_words", test_find_lost_words);
+    CU_add_test(suite, "get_info_from_buffer", test_get_file_info_from_buffer);
     
 }
 
