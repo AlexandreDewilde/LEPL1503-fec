@@ -135,7 +135,7 @@ for nb in range(20, 60, 20):
     for i in range(nb):
         with open(f"{dirpath}/{i}", 'wb') as f:
             f.write(content)
-    cmd = f"python lepl1503-2022-pyfec/main.py {dirpath} -f tests.txt"
+    cmd = f"python3 lepl1503-2022-pyfec/main.py {dirpath} -f tests.txt"
     os.system(f"sh ./test_time.sh '{cmd}' out 1")
     df = pd.read_csv("out.csv")
     df["runtime"] /= 1_000_000_000
