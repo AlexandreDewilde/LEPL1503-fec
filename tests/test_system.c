@@ -277,6 +277,5 @@ void test_gen_coefs() {
     CU_ASSERT_EQUAL(0, memcmp(res[0], ans[0], 2));
     CU_ASSERT_EQUAL(0, memcmp(res[1], ans[1], 2));
 
-    free(res[0]);
     free(res);
 }

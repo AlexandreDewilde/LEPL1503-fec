@@ -253,7 +253,6 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     output_infos->uncomplete_block = uncomplete_block;
     output_infos->filename = file_thread->filename;
 
-    free(coeffs[0]);
     free(coeffs);
 }
 
