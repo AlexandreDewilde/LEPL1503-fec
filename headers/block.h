@@ -114,4 +114,8 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread);
  */
 void write_to_file(output_infos_t *output_infos, FILE *output_stream);
 
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
+
+int64_t get_file_size(FILE *file);
+
 #endif /* BLOCK_H */
