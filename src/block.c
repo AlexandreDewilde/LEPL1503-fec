@@ -71,9 +71,12 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     uint32_t unknowns = 0;
 
     for (uint32_t i = 0; i < block->block_size;i++) {
-        uint32_t count = 0;
+        bool count = 0;
         for (uint32_t j = 0; j < block->word_size;j++) {
-            count += block->message[i*block->word_size + j];
+            if (block->message[i*block->word_size + j]) {
+                count = true;
+                break;
+            }
         }
         // If count == 0 then all bytes equal 0 then we assume it's a lost word
         if (!count) {
