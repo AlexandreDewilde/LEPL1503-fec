@@ -159,7 +159,7 @@ void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uin
     }
 }
 
-void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_t message_size, FILE *output) {
+void write_blocks(uint8_t *message, block_t *blocks, uint64_t nb_blocks, uint64_t message_size, FILE *output) {
     if (!nb_blocks) return;
     uint8_t *current = message + blocks[0].block_size * blocks[0].word_size;
     
@@ -177,7 +177,7 @@ void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_
 
 
 
-void parse_file(output_consumer_t *output_consumer, file_producer_t *file_producer) {
+void parse_file(file_producer_t *file_producer, output_consumer_t *output_consumer) {
     if (!file_producer->filename) {
         memset(output_consumer, 0, sizeof(output_consumer_t));
         return;

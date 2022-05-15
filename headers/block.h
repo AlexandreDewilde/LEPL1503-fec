@@ -102,21 +102,22 @@ void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uin
  * @param blocks: the block that will contain message 
  * @param output : the file in witch we will write bloc
  */
-void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_t message_size, FILE *output);
+void write_blocks(uint8_t *message, block_t *blocks, uint64_t nb_blocks, uint64_t message_size, FILE *output);
 
 /**
  *
  * This function treats the information give by the the structure file_producer (containing the file information)
  * and puts the result in the structure output_consumer
- * @param output_consumer: a pointer to the structure where the function keeps the result 
  * @param file_producer:  a pointer to the structure keeping the information to be treated by the function
+ * @param output_consumer: a pointer to the structure where the function store the results
  */
-void parse_file(output_consumer_t *output_consumer, file_producer_t *file_producer);
+void parse_file(file_producer_t *file_producer, output_consumer_t *output_consumer);
+
 
 /**
  *
  * This function writes in the output file the given information.
- * @param output_consumer: a pointer of the file that have information to write in the output file
+ * @param output_consumer: a pointer of the informations to write in the output file
  * @param output_stream : a pointer of the file that we want to keep informations in (write in)
  */
 void write_to_file(output_consumer_t *output_consumer, FILE *output_stream);

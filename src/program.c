@@ -137,7 +137,7 @@ void producer() {
 
         output_consumer_t current_output_info;
 
-        parse_file(&current_output_info, &current_file_producer);
+        parse_file(&current_file_producer, &current_output_info);
         
 
         if (sem_wait(empty_writer) != 0) sem_error("sem_wait");
