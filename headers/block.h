@@ -65,7 +65,7 @@ void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
 
 /**
  *
- * This function finds lost word in our file
+ * This function finds lost word in the block passed in parameter
  * @param block: the block we want to find if there is lost words 
  * @param unknown_indexes: A list of  boolean tell us if yes or no there is a lost symbol  in the block
  */
@@ -85,7 +85,7 @@ void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32
 
 /**
  *
- * This function prepares the block to allow writing 
+ * This function process the blocks passed in parameter, to solve lost words
  * @param block: The block that will have part of message 
  * @param unknowns_indexes: a list of bollean
  * @param redudancy: the block that the linear system will be build from

@@ -121,7 +121,7 @@ void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uin
     uint32_t unknowns = find_lost_words(block, unknowns_indexes);
 
     if (unknowns > redudancy) {
-        fprintf(stderr, "Too much unknowns symbols\n");
+        DEBUG("Too much unknowns symbols\n");
         return;
     }
 
