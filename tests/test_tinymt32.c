@@ -1,12 +1,6 @@
 #include "./headers/test_tinymt32.h"
 #include "../headers/debug.h"
 
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void test_tinymt32_gen_42()
 {
