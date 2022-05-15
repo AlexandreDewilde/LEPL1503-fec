@@ -92,7 +92,7 @@ typedef struct {
 typedef struct {
     char *filename;
     FILE *file;
-} file_thread_t;
+} file_producer_t;
 
 typedef struct {
     uint8_t *file_data;
@@ -104,7 +104,7 @@ typedef struct {
     uint32_t remaining;
     bool uncomplete_block;
 
-} output_infos_t;
+} output_consumer_t;
 ```
 
 
