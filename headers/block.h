@@ -39,7 +39,7 @@ typedef struct {
 } file_producer_t;
 
 /*
-* This structrure contains informations about the output file
+* This structrure contains output information afor the output file
 */
 typedef struct {
     uint8_t *file_data;
@@ -120,7 +120,6 @@ void parse_file(output_consumer_t *output_consumer, file_producer_t *file_produc
  * @param output_stream : a pointer of the file that we want to keep informations in (write in)
  */
 void write_to_file(output_consumer_t *output_consumer, FILE *output_stream);
-
 
 
 

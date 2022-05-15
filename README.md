@@ -243,3 +243,7 @@ We used various in built commands for our makefile, one may need to install some
 | make clean              | Cleans `fec` executable and all source objects in the root directory and it's children directories.|
 | make clean_tests        | Cleans all the testing objects and executables in the root directory and it's children directories except, `fec` executable. |
 | make clean_speed_tests  | Cleans all the speed testing objects and executables in the root directory and it's children directories except, `fec` executable.  |
+
+### Comments
+All functions descriptions and comment are in **.h** files. Thus, when you hover over the functions, the descriptions are shown. 
+![alt text](../lepl1503-2022-skeleton-group-w4/Hovering.png "Hover view").
