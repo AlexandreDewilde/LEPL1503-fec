@@ -136,7 +136,12 @@ For the multi threading, we used POSIX threads. Our goal was to separate the cod
 The design we used throughout our project is the `Consumer/Producer Pattern`. This design pattern means that some threads produce while others consume what the producers produced. This design pattern is used twice in our project as explained previously.
 We used semaphores and mutex to handle communication and exclusivity respectfull in our project. 
 
-In order to ensure that we consume the least memory possible ... [TO BE COMPLETED]
+In order to ensure that we consume the least memory possible, we :
+* Decreased the number of memory allocations: The allocation tion of memory on the heap is something that takes time time, and some embedded systems may have their RAM limited. Therefore, the number of allocation has been reduced.
+* We used the  pointer arithmetic in order to prevent extra allocations on the heap.
+* We avoided allocating memory while writing in the output file and replace some functions which allocated additional memory by functions in place
+
+For more precision and example, check out the report file.
 
 #### 3. 3. 2 Data Structure 
 

@@ -5,6 +5,9 @@
 #include "tools.h"
 #include <CUnit/Basic.h>
 
+/*
+* This function test the program on single file or multiple files
+*/
 void test_program();
 
 #endif /* TEST_PROGRAM*/

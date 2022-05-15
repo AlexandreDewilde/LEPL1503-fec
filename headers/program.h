@@ -20,7 +20,11 @@
 #include "portable_endian.h"
 #include "portable_semaphore.h"
 
-
+/*
+* The function runs the whole program and is called by the main function in main.c
+* @param : argc : the number of arguments given by the user
+* @param : argv: the arguments given by the user
+*/
 int program(int argc, char *argv[]);
 
 #endif /*PROGRAM_H */

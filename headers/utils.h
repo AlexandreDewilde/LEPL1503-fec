@@ -18,6 +18,9 @@
 #include "block.h"
 #include "portable_semaphore.h"
 
+/*
+* This structrure contains all arguments given by the user
+*/
 typedef struct
 {
     DIR *input_dir;
@@ -27,8 +30,19 @@ typedef struct
     bool verbose;
 } args_t;
 
+/*
+* This function prints informations about the program
+* @param : prog_name : the directory of the program
+*/
 void usage(char *prog_name);
 
+
+/*
+* This function treats all arguments given by the user
+* @param : args : a pointer of all important arguments
+* @param : argc : the number of arguments given by the user
+* @param : args : the arguments given by the user
+*/
 int parse_args(args_t *args, int argc, char *argv[]);
 
 #endif // __UTILS_H__
