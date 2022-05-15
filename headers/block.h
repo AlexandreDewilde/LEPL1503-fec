@@ -128,7 +128,7 @@ void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
 /**
  *
  * For Get the size of the file 
- * @param Butput_stream : File that we want to get the size 
+ * @param file : File that we want to get the size 
  */
 int64_t get_file_size(FILE *file);
 
