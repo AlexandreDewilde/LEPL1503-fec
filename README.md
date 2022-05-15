@@ -148,9 +148,8 @@ For more precision and example, check out the report file.
 The data structure used for holding the result is a circular fixed size buffer. The size of the buffer is equal to the user input number of threads. We choose a fixed size because of various reasons, the main reason was that since, a Raspberry Pi is an embedded computer with (1GB RAM), for big computations a varying size buffer may cause a heap overflow. Therefore with our data structure we are more than sure that it won't be a problem.
 
 ### 3. 4 Image :
-[To be changed]
 
-![alt text](../lepl1503-2022-skeleton-group-w4/Architecture_du_Projet_3.png "Design view").
+![project_folder](https://forge.uclouvain.be/p3-2022/group-w/lepl1503-2022-skeleton-group-w4/-/raw/main/image/Architecture_du_Projet_3.png "Design view").
 
 A system architecture image can be found in project folder.
 
