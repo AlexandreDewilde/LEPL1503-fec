@@ -236,11 +236,11 @@ We used various in built commands for our makefile, one may need to install some
 * **Valgrind** : A dynamic analysis tool for memory leak detection, threading bugs etc. [Install](https://riptutorial.com/valgrind/example/32345/installation-or-setup)
 
 
-| command            | functionalities                                             |
-| :----------------- | :---------------------------------------------------------- |
-| make fec        | Compile the fec executable object.|
-| make tests         | Execute all our tests with failure reports.|
-| make speed_tests      | Execute all our speed tests|
-| make clean         | Cleans `fec` executable and all source objects in the root directory and it's children directories.|
-| make clean_tests | Cleans all the testing objects and executables in the root directory and it's children directories except, `fec` executable. |
+| command                 | functionalities                                             |
+| :-----------------      | :---------------------------------------------------------- |
+| make fec                | Compile the fec executable object.|
+| make tests              | Execute all our tests with failure reports.|
+| make speed_tests        | Execute all our speed tests|
+| make clean              | Cleans `fec` executable and all source objects in the root directory and it's children directories.|
+| make clean_tests        | Cleans all the testing objects and executables in the root directory and it's children directories except, `fec` executable. |
 | make clean_speed_tests  | Cleans all the speed testing objects and executables in the root directory and it's children directories except, `fec` executable.  |
