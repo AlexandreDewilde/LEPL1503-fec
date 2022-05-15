@@ -177,14 +177,14 @@ void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_
 
 
 
-void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
-    if (!file_thread->filename) {
-        memset(output_infos, 0, sizeof(output_infos_t));
+void parse_file(output_consumer_t *output_consumer, file_producer_t *file_producer) {
+    if (!file_producer->filename) {
+        memset(output_consumer, 0, sizeof(output_consumer_t));
         return;
     }
 
     file_info_t file_info;
-    file_info.file_size =  get_file_size(file_thread->file);
+    file_info.file_size =  get_file_size(file_producer->file);
 
     uint8_t *file_data = malloc(file_info.file_size);
     if (file_data == NULL) {
@@ -193,7 +193,7 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
     }
     uint8_t *binary_data = file_data + 24;
 
-    size_t readed = fread(file_data, 1, file_info.file_size, file_thread->file);
+    size_t readed = fread(file_data, 1, file_info.file_size, file_producer->file);
     if (readed != file_info.file_size) {
         fprintf(stderr, "Error reading file\n");
         exit(EXIT_FAILURE);
@@ -241,43 +241,43 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
 
     free(unknowns_indexes);
 
-    output_infos->file_data = file_data;
-    output_infos->file_size = file_info.file_size;
-    output_infos->message_size = file_info.message_size;
-    output_infos->blocks = blocks;
-    output_infos->nb_blocks = nb_blocks;
-    output_infos->remaining = remaining;
-    output_infos->uncomplete_block = uncomplete_block;
-    output_infos->filename = file_thread->filename;
+    output_consumer->file_data = file_data;
+    output_consumer->file_size = file_info.file_size;
+    output_consumer->message_size = file_info.message_size;
+    output_consumer->blocks = blocks;
+    output_consumer->nb_blocks = nb_blocks;
+    output_consumer->remaining = remaining;
+    output_consumer->uncomplete_block = uncomplete_block;
+    output_consumer->filename = file_producer->filename;
 
     free(coeffs);
 }
 
 
-void write_to_file(output_infos_t *output_infos, FILE *output_stream) {
-    uint32_t filename_length = htobe32(strlen(output_infos->filename));
+void write_to_file(output_consumer_t *output_consumer, FILE *output_stream) {
+    uint32_t filename_length = htobe32(strlen(output_consumer->filename));
     size_t written = fwrite(&filename_length, sizeof(uint32_t), 1, output_stream);
     if (written != 1) {
         fprintf(stderr, "Error writing to output the length of filename");
         exit(EXIT_FAILURE);
     }
 
-    uint64_t message_size_be = htobe64(output_infos->message_size);
+    uint64_t message_size_be = htobe64(output_consumer->message_size);
     written = fwrite(&message_size_be, sizeof(uint64_t), 1, output_stream);
     if (written != 1) {
         fprintf(stderr, "Error writing to output the message size\n");
         exit(EXIT_FAILURE);
     }
-    written = fwrite(output_infos->filename, strlen(output_infos->filename), 1, output_stream);
+    written = fwrite(output_consumer->filename, strlen(output_consumer->filename), 1, output_stream);
     if (written != 1) {
         fprintf(stderr, "Error writing to output the filename\n");
         exit(EXIT_FAILURE);
     }
-    if (output_infos->nb_blocks > 0) {
-        write_blocks(output_infos->blocks[0].message, output_infos->blocks, output_infos->nb_blocks, output_infos->message_size, output_stream);
+    if (output_consumer->nb_blocks > 0) {
+        write_blocks(output_consumer->blocks[0].message, output_consumer->blocks, output_consumer->nb_blocks, output_consumer->message_size, output_stream);
     }
 
-    free(output_infos->file_data);
-    free(output_infos->blocks);
-    free(output_infos->filename);
+    free(output_consumer->file_data);
+    free(output_consumer->blocks);
+    free(output_consumer->filename);
 }

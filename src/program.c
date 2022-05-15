@@ -9,7 +9,7 @@ int out = 0;
 sem_t *full;
 sem_t *empty;
 pthread_mutex_t mutex;
-file_thread_t buffer[buffer_size];
+file_producer_t buffer[buffer_size];
 
 
 int in_writer = 0;
@@ -17,7 +17,7 @@ int out_writer = 0;
 sem_t *full_writer;
 sem_t *empty_writer;
 pthread_mutex_t mutex_writer;
-output_infos_t buffer_writer[buffer_size];
+output_consumer_t buffer_writer[buffer_size];
 
 int skipped_buffer = 0;
 
@@ -66,36 +66,36 @@ void folder_producer() {
         // This is a simple example of how to use the verbose mode
         DEBUG("Successfully opened the file %s\n", full_path);
 
-        file_thread_t current_file_thread = {
+        file_producer_t current_file_producer = {
             .filename = malloc(strlen(directory_entry->d_name)+1), // Error treated after init
             .file = input_file
         };
         
-        if (!current_file_thread.filename) {
+        if (!current_file_producer.filename) {
             fprintf(stderr, "Error to allocate memory for filename\n");
             exit(EXIT_FAILURE);
         }
-        strcpy(current_file_thread.filename, directory_entry->d_name);
+        strcpy(current_file_producer.filename, directory_entry->d_name);
 
 
         if (sem_wait(empty) != 0) sem_error("sem_wait");
         if(pthread_mutex_lock(&mutex) != 0) mutex_error();
-        buffer[in] = current_file_thread;
+        buffer[in] = current_file_producer;
         in = (in + 1) % buffer_size;
         if (pthread_mutex_unlock(&mutex) != 0) mutex_error();
         if (sem_post(full) != 0) sem_error("sem_post");
         
     }
 
-    file_thread_t current_file_thread;
-    memset(&current_file_thread, 0, sizeof(file_thread_t));
+    file_producer_t current_file_producer;
+    memset(&current_file_producer, 0, sizeof(file_producer_t));
     
     for (int i = 0; i < args.nb_threads; i++) {
 
         if (sem_wait(empty) != 0) sem_error("sem_wait");
         if (pthread_mutex_lock(&mutex) != 0) mutex_error();;
         
-        buffer[in] = current_file_thread;
+        buffer[in] = current_file_producer;
         in = (in + 1) % buffer_size;
         if (pthread_mutex_unlock(&mutex) != 0) mutex_error();
         if (sem_post(full) != 0) sem_error("sem_post"); 
@@ -130,14 +130,14 @@ void producer() {
        
         if (sem_wait(full) != 0) sem_error("sem_wait");
         if (pthread_mutex_lock(&mutex) != 0) mutex_error();
-        file_thread_t current_file_thread = buffer[out];
+        file_producer_t current_file_producer = buffer[out];
         out = (out + 1) % buffer_size;
         if (pthread_mutex_unlock(&mutex) != 0) mutex_error();
         if (sem_post(empty) != 0) sem_error("sem_post");
 
-        output_infos_t current_output_info;
+        output_consumer_t current_output_info;
 
-        parse_file(&current_output_info, &current_file_thread);
+        parse_file(&current_output_info, &current_file_producer);
         
 
         if (sem_wait(empty_writer) != 0) sem_error("sem_wait");
@@ -147,11 +147,11 @@ void producer() {
         if (pthread_mutex_unlock(&mutex_writer) != 0) mutex_error();
         if (sem_post(full_writer) != 0) sem_error("sem_post");
         
-        if (!current_file_thread.filename) {
+        if (!current_file_producer.filename) {
             break;
         }
         // Close this instance file
-        fclose(current_file_thread.file);
+        fclose(current_file_producer.file);
     }
 }
 
@@ -160,7 +160,7 @@ void consumer() {
 
         if (sem_wait(full_writer) != 0) sem_error("sem_wait");
         if (pthread_mutex_lock(&mutex_writer) != 0) mutex_error();
-        output_infos_t current_file_info = buffer_writer[out_writer];
+        output_consumer_t current_file_info = buffer_writer[out_writer];
         out_writer = (out_writer + 1) % buffer_size;
         if (pthread_mutex_unlock(&mutex_writer) != 0) mutex_error();
         if (sem_post(empty_writer) != 0) sem_error("sem_post");

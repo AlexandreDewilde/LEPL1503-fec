@@ -36,7 +36,7 @@ typedef struct {
 typedef struct {
     char *filename;
     FILE *file;
-} file_thread_t;
+} file_producer_t;
 
 /*
 * This structrure contains informations about the output file
@@ -51,7 +51,7 @@ typedef struct {
     uint32_t remaining;
     bool uncomplete_block;
 
-} output_infos_t;
+} output_consumer_t;
 
 
 /**
@@ -106,20 +106,20 @@ void write_blocks(uint8_t *message, block_t *blocks, uint32_t nb_blocks, uint64_
 
 /**
  *
- * This function treats the information give by the the structure file_thread (containing the file information)
- * and puts the result in the structure output_infos
- * @param output_infos: a pointer to the structure where the function keeps the result 
- * @param file_thread:  a pointer to the structure keeping the information to be treated by the function
+ * This function treats the information give by the the structure file_producer (containing the file information)
+ * and puts the result in the structure output_consumer
+ * @param output_consumer: a pointer to the structure where the function keeps the result 
+ * @param file_producer:  a pointer to the structure keeping the information to be treated by the function
  */
-void parse_file(output_infos_t *output_infos, file_thread_t *file_thread);
+void parse_file(output_consumer_t *output_consumer, file_producer_t *file_producer);
 
 /**
  *
  * This function writes in the output file the given information.
- * @param output_infos: a pointer of the file that have information to write in the output file
+ * @param output_consumer: a pointer of the file that have information to write in the output file
  * @param output_stream : a pointer of the file that we want to keep informations in (write in)
  */
-void write_to_file(output_infos_t *output_infos, FILE *output_stream);
+void write_to_file(output_consumer_t *output_consumer, FILE *output_stream);
 
 
 
