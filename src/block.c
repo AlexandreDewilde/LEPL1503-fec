@@ -91,7 +91,13 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
     return unknowns;
 }
 
-void make_linear_system(uint8_t **A, uint8_t **B, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs) {
+void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs) {
+    uint8_t *b_sub_line = malloc(block->word_size);
+    if (!b_sub_line) {
+        fprintf(stderr, "Couldn't allocate memory for sub_line\n");
+        exit(EXIT_FAILURE);
+    }
+
     for (uint32_t i = 0; i < unknown; i++) {
         uint32_t temp = 0;
         for (uint32_t j = 0; j < block->block_size; j++) {
@@ -105,18 +111,13 @@ void make_linear_system(uint8_t **A, uint8_t **B, uint8_t *b_sub_line, bool *unk
             } 
         }
     } 
-
+    free(b_sub_line);
     verbose_linear_system(A, B, unknown, block->word_size);
     DEBUG("Size :%d\n", unknown);
 }
 
-void process_block(block_t *block, uint8_t **coeffs, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t redudancy) {
+void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uint32_t redudancy) {
    
-    if (unknowns_indexes == NULL) {
-        fprintf(stderr, "Failed to allocated unknown indexes vector\n");
-        exit(EXIT_FAILURE);
-    }
-
     uint32_t unknowns = find_lost_words(block, unknowns_indexes);
 
     if (unknowns > redudancy) {
@@ -145,7 +146,7 @@ void process_block(block_t *block, uint8_t **coeffs, uint8_t *b_sub_line, bool *
             memcpy(B[i], block->message + (block->block_size + i) * block->word_size, block->word_size);
         }
 
-        make_linear_system(A, B, b_sub_line, unknowns_indexes, unknowns, block, coeffs);
+        make_linear_system(A, B, unknowns_indexes, unknowns, block, coeffs);
         gf_256_gaussian_elimination(A, B, block->word_size, unknowns);
 
         uint32_t temp = 0;
@@ -221,17 +222,12 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
         exit(EXIT_FAILURE);
     }
 
-    uint8_t *b_sub_line = malloc(file_info.word_size);
-    if (!b_sub_line) {
-        fprintf(stderr, "Couldn't allocate memory for sub_line\n");
-        exit(EXIT_FAILURE);
-    }
 
     for (uint64_t i = 0; i < nb_blocks - uncomplete_block; i++) {
         blocks[i].block_size = file_info.block_size;
         blocks[i].word_size = file_info.word_size;
         blocks[i].message = binary_data + (file_info.block_size + file_info.redudancy) * file_info.word_size * i;
-        process_block(&blocks[i], coeffs, b_sub_line, unknowns_indexes, file_info.redudancy);
+        process_block(&blocks[i], coeffs, unknowns_indexes, file_info.redudancy);
     }
 
     uint32_t remaining = ( (file_info.file_size - 24 - (nb_blocks-uncomplete_block) * step) / file_info.word_size) - file_info.redudancy;
@@ -240,11 +236,10 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread) {
         blocks[nb_blocks-1].block_size = remaining;
         blocks[nb_blocks-1].word_size = file_info.word_size;
         blocks[nb_blocks-1].message = binary_data + (file_info.block_size + file_info.redudancy) * file_info.word_size * (nb_blocks-1);
-        process_block(&blocks[nb_blocks-1], coeffs, b_sub_line, unknowns_indexes, file_info.redudancy);
+        process_block(&blocks[nb_blocks-1], coeffs, unknowns_indexes, file_info.redudancy);
     }
 
     free(unknowns_indexes);
-    free(b_sub_line);
 
     output_infos->file_data = file_data;
     output_infos->file_size = file_info.file_size;

@@ -56,11 +56,12 @@ typedef struct {
 
 /**
  *
- * This function gets the information of the given file 
- * @param file: the file we want to get informations 
- * @param file_info: Structure 
+ * This function gets the file information from a gievn buffer and puts the in the structure passed in argument
+ * @param buffer: the buffer  we want to get informations from
+ * @param file_info: a pointer to the structure that will contained the infos stored in the buffer
  */
-void get_file_info(FILE *file, file_info_t *file_info);
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
+
 
 /**
  *
@@ -76,10 +77,11 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes);
  * @param A: Empty matrix already allocated, that the function will modify
  * @param B: Empty matrix already allocated, that the function will modify
  * @param unknowns_indexes: Number of unknowns ub the linear system
+ * @param unknowns: Number of unknowns
  * @param block: the block that the linear system will be build from
  * @param coeffs: the coeffs to generate the A matrix of the linear system
  */
-void make_linear_system(uint8_t **A, uint8_t **B, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs);
+void make_linear_system(uint8_t **A, uint8_t **B, bool *unknowns_indexes, uint32_t unknowns, block_t *block, uint8_t **coeffs);
 
 /**
  *
@@ -89,7 +91,7 @@ void make_linear_system(uint8_t **A, uint8_t **B, uint8_t *b_sub_line, bool *unk
  * @param redudancy: the block that the linear system will be build from
  * @param coeffs: the coeffs to generate that help us to solve the linear_ststem
  */
-void process_block(block_t *block, uint8_t **coeffs, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t redudancy);
+void process_block(block_t *block, uint8_t **coeffs, bool *unknowns_indexes, uint32_t redudancy);
 
 /**
  *
@@ -119,29 +121,7 @@ void parse_file(output_infos_t *output_infos, file_thread_t *file_thread);
  */
 void write_to_file(output_infos_t *output_infos, FILE *output_stream);
 
-/**
- *
- * This function gets the file information from a gievn buffer
- * @param buffer: the buffer  we want to get informations from
- * @param file_info: a pointer to the structure containing the file info 
- */
-void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
 
-
-/**
- *
- * This function gets the file information from a gievn buffer
- * @param buffer: the buffer  we want to get informations from
- * @param file_info: a pointer to the structure containing the file info 
- */
-void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
-
-/* This function is duplicated********************************************
- * Get file informations comming to the buffer.
- * @param Buffer: Buffer that will have our file info
- * @param file_info : the File structure in with we want to keep informations
- */
-void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
 
 
 /**
