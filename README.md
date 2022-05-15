@@ -245,4 +245,6 @@ We used various in built commands for our makefile, one may need to install some
 
 ### Comments
 All functions descriptions and comment are in **.h** files. Thus, when you hover over the functions, the descriptions are shown. 
-![alt text](../lepl1503-2022-skeleton-group-w4/Hovering.png "Hover view").
+![alt text](../lepl1503-2022-skeleton-group-w4/image/Hovering.png "Hover view").
+
+We would also like to point out that on gitlab, the submission of Vany Ingenzi was a mistake by one of us, who was using the computer in Intel lab under his session and push on gitlab without paying attention.
