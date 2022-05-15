@@ -27,8 +27,24 @@ typedef struct
     bool verbose;
 } args_t;
 
+
+
+/**
+ *
+ * Help to get some command informations. 
+ * @param prog_name : the name of the program  we want to start.
+ */
 void usage(char *prog_name);
 
+
+
+/**
+ *
+ * Set the values of the file (nb_threads , verbose = false , output_stream )
+ * @param args: the structure of type of args_t
+ * @param argc: Must be an integer
+ * @param argv[]: list of arguments 
+ */
 int parse_args(args_t *args, int argc, char *argv[]);
 
 #endif // __UTILS_H__
