@@ -10,12 +10,7 @@ int system_teardown() {
     return 0;
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gf_256_full_add_vector_simple_test() {
     // Simple basic test case
@@ -36,12 +31,7 @@ void test_gf_256_full_add_vector_simple_test() {
     DEBUG("The function test_gf_256_full_add_vector_simple_test was executed\n"); //This is just a test of debug (verbose)
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gf_256_full_add_vector_random_test(uint32_t vector_size) {
     uint8_t *random_vector1 = generate_random_vector(vector_size);
@@ -58,24 +48,10 @@ void test_gf_256_full_add_vector_random_test(uint32_t vector_size) {
 }
 
 
-/**
-*
-*
-* @param
-* @return: 
-*/
-
 void test_gf_256_full_add_vector() {
     test_gf_256_full_add_vector_simple_test();
     test_gf_256_full_add_vector_random_test(100);
 }
-
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void test_gf_256_mul_vector_simple_test(){
     uint8_t coef =0;
@@ -108,12 +84,6 @@ void test_gf_256_mul_vector_simple_test(){
     free(r_symboles);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void test_gf_256_mul_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_t nss, uint32_t nrs){
     uint8_t *random_vector1 = generate_random_vector(size_vec);
@@ -130,12 +100,6 @@ void test_gf_256_mul_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_
     free(coef_ptr);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void test_gf_256_mul_vector() {
     test_gf_256_mul_vector_simple_test();
@@ -144,12 +108,7 @@ void test_gf_256_mul_vector() {
     test_gf_256_mul_vector_random_test(500,100,2,2);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gf_256_inv_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_t nss, uint32_t nrs){
     uint8_t *random_vector =generate_random_vector(size_vec);
@@ -163,12 +122,7 @@ void test_gf_256_inv_vector_random_test(uint32_t size_vec,uint32_t seed, uint32_
     free(res);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gf_256_inv_vector() {
     uint8_t coefs=25;
@@ -182,12 +136,6 @@ void test_gf_256_inv_vector() {
     free(r_symboles);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void test_gf_256_gaussian_elimination_zero() {
     // Test with zero matrices
@@ -206,12 +154,6 @@ void test_gf_256_gaussian_elimination_zero() {
     free(ans);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
 
 void test_gf_256_gaussian_elimination_basic() {
     // Basic test
@@ -227,12 +169,7 @@ void test_gf_256_gaussian_elimination_basic() {
     CU_ASSERT_EQUAL(0, compare_2Darray(b_double_pointers, ans_double_pointers, 4, 6));
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gf_256_gaussian_elimination_file() {
     uint32_t NB, *n, *b_size;
@@ -257,12 +194,7 @@ void test_gf_256_gaussian_elimination_file() {
     free(solutions);
 }
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gf_256_gaussian_elimination() {
     test_gf_256_gaussian_elimination_zero();
@@ -271,12 +203,7 @@ void test_gf_256_gaussian_elimination() {
 }
 
 
-/**
-*
-*
-* @param
-* @return: 
-*/
+
 
 void test_gen_coefs() {
     uint8_t** res = gen_coefs(42, 2, 2);
