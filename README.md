@@ -1,13 +1,13 @@
 For better visibilty please open this file with a modern MarkDown(.md) reader.
 
-# LEPL1503-2022-GROUPEW4
+# LEPL1503-2022 - GROUPE W4
 Below, you will find everything you need know about our project from the course LEPL1503.
 
 ## 1. Our Objective
 
 Our goal is, given a Python code which does resolve the complicated problem of
 the use of error-correcting codes (*codes correcteurs d'erreurs*), we have *to do a C version of the code/program*. 
-The C program must do the exact same thing as the Python program but must be faster. In addition, we must do a parallel computing (using Threads). More to that our C program must run well on Raspberry Pi, with an energy consumption that is averagely good.
+The C program must do the exact same thing as the Python program but must be faster. In addition, we must do a parallelize the code (using Threads). More to that our C program must run well on Raspberry Pi, with an energy consumption that is averagely good.
 
 For more specifications, check out [here](https://moodle.uclouvain.be/pluginfile.php/334805/mod_resource/content/3/lepl1503_project_statement.pdf).
 
@@ -26,6 +26,7 @@ The user has a certain power over the perfomance of the program since she/he has
 
 Our project folder is like follow:
 ```
+|hamlet/
 |headers/
 |samples/
 |src/
@@ -34,19 +35,18 @@ Our project folder is like follow:
 |Makefile
 |README
 ```
-
+* Hamlet, a folder containing a sample file that is the tragedy of hamlet with lost words and redudancy symbols
 * All files that end with **.h** will be in `headers` folder. As the name of the folder indicate, this will contain our custom headers used in the project. 
 * `samples` folder contains exaples of input binary files. 
 * All files in `src` folder are source files **.c**, that implement the functions defined in their corresponding headers in `headers`.
 * In `tests` folder, there are
     * `headers` folder which contains files that end with **.h**, used to tests our program.
-    * `results` folder containing **.bin** files, which group the correct answer for the calculations for each file given in the input.
+    * `results` folder containing **.bin** files, which group the correct answer for the calculations for each file given in the samples folder.
     * `speed_tests` folder containing a source file **.c** , that tests the speed of our functions and systems.
     * Tests files **.c**, that implement the testing functions defined in their corresponding headers in `headers`.
 
 * `main.c` is our main file.
- 
-* The `output_file` file, if given by the user,which contains the output or result of our program.
+
 
 ## 3. System Architecture
 In order to keep our code easily maintanable and understable, we had to use various software design techniques :
@@ -55,15 +55,15 @@ In order to keep our code easily maintanable and understable, we had to use vari
 It is a software design technique whose aim is to separate the functionalites of a whole program into different (nearly) independent modules.
 
 In our project we have about 6 modules : 
-//COMMENT : the purpose of each module is to be completed later 
+ 
 | Module            | Purpose                                                 | Dependency On Other Modules |
 | ----------------- | :------------------------------------------------------ | ---------: |
-| block   | TO DO | Yes| 
-| debug   | TO DO | No | 
-| program | TO DO | Yes|
-| system  | TO DO | Yes|
-| tinymt32| TO DO | No |
-| utils   | TO DO | Yes|
+| block   | All functions related to blocks parsing and writing | Yes| 
+| debug   | All functions used to debug code in verbose mode | No | 
+| program | The program function | Yes|
+| system  | All functions related to linear system solving | Yes|
+| tinymt32| Functions related to random number generations | No |
+| utils   | Some utils function used in the program | Yes|
 
 
 
@@ -175,12 +175,6 @@ if (!coefs) {
 }
 
 ```
-
-
-
-Notice : 
-
-* We don't evaluate all the returned values by all functions because of the readibility. Par example, mutexes can only have an error if the programmer, mismanaged the locking and unlocking of them. So we make the hypothese that nobody is going to modify our code, and that we already handled all, possible errors that can be caused by us. On the other hand, returned values of functions that depend on the system like, `malloc`, semaphores, etc will always be checked. The sources used to determine all possible errors are man pages provided in our course [LEPL1503 - Projet 3].
 
 
 
