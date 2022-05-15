@@ -44,27 +44,6 @@ plt.legend(loc='best')
 plt.savefig("ExecutionTimeByNumberOfThreads.png")
 plt.close()
 
-tests = []
-for i in range(1, 8):
-        
-    cmd = f"./fec samples -f tests.txt -n {i}"
-    os.system(f"sh ./test_time.sh '{cmd}' out 50")
-    df = pd.read_csv("out.csv")
-    df["runtime"] /= 1_000_000_000
-    tests.append(sum(df["runtime"]) / len(df["runtime"]))
-
-plt.plot(range(1, len(tests)+1), tests)
-
-os.remove("tests.txt")
-
-plt.title(f"Temps d'exécution du programme sur un dossier défini en fonction du nombre N de threads de calcul")
-plt.xlabel("Nombre N de threads de calcul")
-plt.ylabel("Temps en secondes mis pour une exécution")
-plt.xticks(range(1, len(tests)+1))
-plt.legend(loc='best')
-plt.savefig("ExecutionByNumerOfThreadsDefinedFolder.png")
-plt.close()
-
 
 tests_c_mono = []
 tests_c = []

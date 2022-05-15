@@ -92,13 +92,6 @@ uint32_t find_lost_words(block_t *block, bool *unknown_indexes) {
 }
 
 void make_linear_system(uint8_t **A, uint8_t **B, uint8_t *b_sub_line, bool *unknowns_indexes, uint32_t unknown, block_t *block, uint8_t **coeffs) {
-
-
-    if (!b_sub_line) {
-        printf("Error to allocate memory for linear system");
-        exit(EXIT_FAILURE);
-    }
-
     for (uint32_t i = 0; i < unknown; i++) {
         uint32_t temp = 0;
         for (uint32_t j = 0; j < block->block_size; j++) {

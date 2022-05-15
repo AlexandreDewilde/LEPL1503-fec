@@ -136,6 +136,14 @@ void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
  */
 void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
 
+/* This function is duplicated********************************************
+ * Get file informations comming to the buffer.
+ * @param Buffer: Buffer that will have our file info
+ * @param file_info : the File structure in with we want to keep informations
+ */
+void get_file_info_from_buffer(uint8_t *buffer, file_info_t *file_info);
+
+
 /**
  *
  * This function returns the size of the given file 

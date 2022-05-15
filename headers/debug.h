@@ -67,11 +67,9 @@ void verbose_linear_system(uint8_t **A, uint8_t **B, uint32_t size, uint32_t b_s
 */
 void DEBUG(const char *restrict format, ...);
 
+
 /*
-* The function prints the given vector
-* This function is used when debugging the program
-* @param : vector : the vector to be printed
-* @param : vector_size: the size of the given vector
+* DEBUG_VECTOR prints a given vector
 */
 void DEBUG_VECTOR(uint8_t *vector, uint32_t vector_size);
 
